@@ -2,12 +2,11 @@
 {% block title %}Admin Dashboard — MediCare{% endblock %}
 
 {% block content %}
-
 <div class="stats">
   {% include 'partials/stat_card.html' with label="Total Patients" value=total_patients sub="All registered" tone="" icon="users" %}
   {% include 'partials/stat_card.html' with label="Appointments Today" value=appointments_today sub="Scheduled" tone="success" icon="calendar" %}
   {% include 'partials/stat_card.html' with label="Pending Invoices" value=pending_invoices sub="Awaiting payment" tone="warn" icon="receipt" %}
-  {% include 'partials/stat_card.html' with label="System Status" value="OK" sub="All services running" tone="success" icon="activity" %}
+  {% include 'partials/stat_card.html' with label="Staff Accounts" value=total_staff sub="Non-patient users" tone="" icon="user-cog" %}
 </div>
 
 <div class="grid-2">
@@ -38,20 +37,28 @@
   </div>
 
   <div class="panel">
-    <div class="panel-head"><h2><i data-lucide="alert-triangle" class="head-icon"></i> System Alerts</h2></div>
-    <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
-      <strong>⚠️ Low stock medicines</strong>
-      <span style="display:block;font-size:12px;color:#6b7a8f;">Check pharmacy inventory</span>
-    </div>
-    <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
-      <strong>📞 Callback requests pending</strong>
-      <span style="display:block;font-size:12px;color:#6b7a8f;">Reception follow-up needed</span>
-    </div>
-    <div style="padding:12px 0;">
-      <strong>✅ System healthy</strong>
-      <span style="display:block;font-size:12px;color:#6b7a8f;">All services running</span>
-    </div>
+    <div class="panel-head"><h2><i data-lucide="alert-triangle" class="head-icon"></i> Operational Alerts</h2></div>
+    {% if low_stock_medicines %}
+      <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
+        <strong>Low-stock medicines: {{ low_stock_medicines }}</strong>
+        <span style="display:block;font-size:12px;color:#6b7a8f;">Review inventory and arrange replenishment.</span>
+      </div>
+    {% endif %}
+    {% if pending_callbacks %}
+      <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
+        <strong>Pending callbacks: {{ pending_callbacks }}</strong>
+        <span style="display:block;font-size:12px;color:#6b7a8f;">Reception follow-up is required.</span>
+      </div>
+    {% endif %}
+    {% if pending_lab_tests %}
+      <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
+        <strong>Outstanding lab tests: {{ pending_lab_tests }}</strong>
+        <span style="display:block;font-size:12px;color:#6b7a8f;">Tests are awaiting completion.</span>
+      </div>
+    {% endif %}
+    {% if not low_stock_medicines and not pending_callbacks and not pending_lab_tests %}
+      <p style="color:#6b7a8f;padding:12px 0;">No outstanding operational alerts.</p>
+    {% endif %}
   </div>
 </div>
-
 {% endblock %}
