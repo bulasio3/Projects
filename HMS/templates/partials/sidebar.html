@@ -70,4 +70,12 @@
     <strong>{{ request.user.get_full_name|default:request.user.username|truncatechars:18 }}</strong>
     <span class="role-tag">{{ current_role_label }}</span>
   </div>
+
+  <form method="post" action="{% url 'logout' %}" class="sidebar-logout">
+    {% csrf_token %}
+    <button type="submit">
+      <i data-lucide="log-out"></i>
+      <span>Log out</span>
+    </button>
+  </form>
 </aside>
