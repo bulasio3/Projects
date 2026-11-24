@@ -1,0 +1,7 @@
+<div class="topbar">
+  <h1>{{ page_title }}</h1>
+  <div class="user">
+    <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+    <div class="avatar">{{ user_initials }}</div>
+  </div>
+</div>

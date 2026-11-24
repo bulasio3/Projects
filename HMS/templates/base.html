@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MediCare HMS{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/hms.css' %}">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+{% if user.is_authenticated %}
+  {% include 'partials/sidebar.html' %}
+{% endif %}
+
+<main class="main {% if not user.is_authenticated %}no-sidebar{% endif %}">
+  {% if user.is_authenticated %}
+    {% include 'partials/topbar.html' %}
+  {% endif %}
+
+  {% if messages %}
+  <div class="messages">
+    {% for m in messages %}
+      <div class="alert {{ m.tags }}">
+        <i data-lucide="info"></i> {{ m }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+
+{% block modals %}{% endblock %}
+
+<script src="{% static 'js/hms.js' %}"></script>
+<script>lucide.createIcons();</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login — MediCare HMS</title>
+  <link rel="stylesheet" href="{% static 'css/hms.css' %}">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body class="login-body">
+
+<div class="login-card">
+  <div class="login-logo">
+    <i data-lucide="activity"></i>
+    <span>Medi<strong>Care</strong></span>
+  </div>
+  <h1>Sign in to your account</h1>
+  <p class="sub">Hospital Management System</p>
+
+  {% if form.errors %}
+    <div class="alert error">
+      <i data-lucide="alert-circle"></i>
+      Invalid username or password.
+    </div>
+  {% endif %}
+
+  <form method="post" class="login-form">
+    {% csrf_token %}
+    <label>
+      <span>Username</span>
+      <div class="input-wrap">
+        <i data-lucide="user"></i>
+        <input type="text" name="username" required autofocus>
+      </div>
+    </label>
+    <label>
+      <span>Password</span>
+      <div class="input-wrap">
+        <i data-lucide="lock"></i>
+        <input type="password" name="password" required>
+      </div>
+    </label>
+    <button type="submit" class="btn-primary">Sign In</button>
+  </form>
+  <p class="footer">© 2025 MediCare HMS</p>
+</div>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>

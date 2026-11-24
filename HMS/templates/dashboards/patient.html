@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Patient Portal — MediCare{% endblock %}
+
+{% block content %}
+{% if not patient %}
+  <div class="panel" style="max-width:600px;text-align:center;">
+    <p style="color:#6b7a8f;padding:24px;">Your patient profile isn't linked yet. Please contact reception.</p>
+  </div>
+{% else %}
+<div class="portal-wrap">
+  <div class="phone">
+    <div class="p-header">
+      <div class="avatar">{{ patient.initials }}</div>
+      <div>
+        <h2>{{ patient.full_name }}</h2>
+        <p>Patient ID: {{ patient.code }}</p>
+      </div>
+    </div>
+
+    <div class="p-actions">
+      <div class="p-action"><i data-lucide="calendar-plus"></i><span>Book</span></div>
+      <div class="p-action"><i data-lucide="pill"></i><span>Rx</span></div>
+      <div class="p-action"><i data-lucide="flask-conical"></i><span>Results</span></div>
+      <div class="p-action"><i data-lucide="credit-card"></i><span>Pay</span></div>
+    </div>
+
+    <div style="padding:0 14px 14px;">
+      <div class="call-banner" onclick="openCall()">
+        <div class="ring"><i data-lucide="phone"></i></div>
+        <div class="txt">
+          <strong>Call Reception</strong>
+          <span>Tap to speak with our team</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-section">
+      <h3>Upcoming Appointments</h3>
+      {% for a in appointments %}
+      <div class="p-card">
+        <div class="date-box"><div class="day">{{ a.date|date:"d" }}</div><div class="mon">{{ a.date|date:"M" }}</div></div>
+        <div class="det">
+          <strong>Dr. {{ a.doctor.user.get_full_name }}</strong>
+          <span>{{ a.doctor.department|default:"General" }} · {{ a.time|time:"H:i" }}</span>
+        </div>
+      </div>
+      {% empty %}
+      <p style="color:#6b7a8f;font-size:13px;">No upcoming appointments.</p>
+      {% endfor %}
+    </div>
+
+    <div class="p-section">
+      <h3>Recent Results</h3>
+      {% for r in recent_results %}
+      <div class="p-card">
+        <div class="date-box" style="background:#e8f8f0;color:#27ae60;"><div class="day">✓</div><div class="mon">Ready</div></div>
+        <div class="det"><strong>{{ r.test_name }}</strong><span>{{ r.created_at|date:"M d" }}</span></div>
+      </div>
+      {% empty %}
+      <p style="color:#6b7a8f;font-size:13px;">No results yet.</p>
+      {% endfor %}
+    </div>
+
+    <div class="p-bottom">
+      <a href="#" class="active"><i data-lucide="home"></i><span>Home</span></a>
+      <a href="#"><i data-lucide="calendar"></i><span>Visits</span></a>
+      <a href="#"><i data-lucide="message-circle"></i><span>Chat</span></a>
+      <a href="#"><i data-lucide="user"></i><span>Profile</span></a>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block modals %}{% if patient %}{% include 'partials/call_modal.html' %}{% endif %}{% endblock %}

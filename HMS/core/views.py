@@ -1,0 +1,230 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Q
+from django.utils import timezone
+from .models import *
+from .forms import PatientForm, AppointmentForm
+from django.core.exceptions import PermissionDenied
+from functools import wraps
+
+# --- SECURITY DECORATOR ---
+def role_required(allowed_roles):
+    """Checks if the logged-in user has the correct role before showing a page."""
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            if request.user.role not in allowed_roles:
+                raise PermissionDenied
+            return view_func(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator
+# --------------------------
+
+ROLE_TEMPLATES = {
+    'admin':      'dashboards/admin.html',
+    'doctor':     'dashboards/doctor.html',
+    'reception':  'dashboards/reception.html',
+    'nurse':      'dashboards/nurse.html',
+    'pharmacist': 'dashboards/pharmacy.html',
+    'lab':        'dashboards/lab.html',
+    'patient':    'dashboards/patient.html',
+}
+ROLE_TITLES = {
+    'admin': 'Admin Dashboard', 'doctor': 'Doctor Dashboard', 'reception': 'Receptionist Dashboard',
+    'nurse': 'Nurse Dashboard', 'pharmacist': 'Pharmacy Dashboard', 'lab': 'Laboratory Dashboard', 'patient': 'Patient Portal',
+}
+
+def home_redirect(request):
+    return redirect('dashboard' if request.user.is_authenticated else 'login')
+
+@login_required
+def dashboard(request):
+    role = getattr(request.user, 'role', 'patient')
+    template = ROLE_TEMPLATES.get(role, ROLE_TEMPLATES['patient'])
+    today = timezone.now().date()
+
+    ctx = {'page_title': ROLE_TITLES[role], 'active_nav': 'dashboard', 'today': today}
+
+    if role == 'admin':
+        ctx.update({
+            'total_patients': Patient.objects.count(),
+            'appointments_today': Appointment.objects.filter(date=today).count(),
+            'pending_invoices': Invoice.objects.filter(status='unpaid').count(),
+            'recent_appointments': Appointment.objects.select_related('patient', 'doctor__user').order_by('-created_at')[:6],
+        })
+    elif role == 'reception':
+        kanban_columns = []
+        for s, title in [('checked_in', 'Checked In'), ('in_progress', 'With Doctor'), ('completed', 'Discharged')]:
+            kanban_columns.append({'title': title, 'items': Appointment.objects.filter(date=today, status=s).select_related('patient', 'doctor__user')[:6]})
+        ctx.update({
+            'call_queue': [
+                {'patient_name': 'Ama Owusu', 'reason': 'Medical question', 'wait_time': '1m 42s'},
+                {'patient_name': 'John Mensah', 'reason': 'Billing query', 'wait_time': '0m 58s'},
+                {'patient_name': 'Kofi Asante', 'reason': 'Book appointment', 'wait_time': '0m 21s'},
+            ],
+            'doctors': Doctor.objects.select_related('user').all()[:6],
+            'today_appointments': Appointment.objects.filter(date=today).select_related('patient', 'doctor__user').order_by('time')[:10],
+            'callbacks': CallbackRequest.objects.filter(status='pending')[:6],
+            'kanban_columns': kanban_columns,
+        })
+    elif role == 'doctor':
+        doctor = getattr(request.user, 'doctor', None)
+        if doctor:
+            ctx.update({
+                'my_appointments': Appointment.objects.filter(doctor=doctor, date=today).order_by('time'),
+                'pending_labs': LabTest.objects.filter(doctor=doctor).exclude(status='ready')[:5],
+                'completed_count': Appointment.objects.filter(doctor=doctor, date=today, status='completed').count(),
+            })
+    elif role == 'patient':
+        patient = getattr(request.user, 'patient', None)
+        if patient:
+            ctx.update({
+                'patient': patient,
+                'appointments': Appointment.objects.filter(patient=patient, date__gte=today).order_by('date')[:4],
+                'recent_results': LabTest.objects.filter(patient=patient, status='ready')[:4],
+            })
+    elif role == 'pharmacist':
+        ctx.update({'medicines': Medicine.objects.order_by('name'), 'low_stock': Medicine.objects.filter(stock__lt=20)})
+    elif role == 'lab':
+        ctx.update({'lab_tests': LabTest.objects.select_related('patient', 'doctor__user').order_by('-created_at')[:50], 'pending_tests': LabTest.objects.exclude(status='ready').count()})
+    elif role == 'nurse':
+        ctx.update({'today_appointments': Appointment.objects.filter(date=today, status__in=['checked_in', 'in_progress']).select_related('patient', 'doctor__user')[:20]})
+
+    return render(request, template, ctx)
+
+
+# --- PATIENTS ---
+@login_required
+@role_required(['admin', 'reception'])
+def patient_list(request):
+    q = request.GET.get('q', '').strip()
+    patients = Patient.objects.all().order_by('-created_at')
+    if q:
+        patients = patients.filter(Q(full_name__icontains=q) | Q(code__icontains=q) | Q(phone__icontains=q))
+    return render(request, 'patients/list.html', {'patients': patients, 'q': q, 'page_title': 'Patients', 'active_nav': 'patients'})
+
+@login_required
+@role_required(['admin', 'reception'])
+def patient_create(request):
+    form = PatientForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        p = form.save()
+        messages.success(request, f'Patient {p.full_name} registered.')
+        return redirect('patient_detail', pk=p.pk)
+    return render(request, 'patients/form.html', {'form': form, 'page_title': 'Register New Patient', 'active_nav': 'patients'})
+
+@login_required
+@role_required(['admin', 'reception'])
+def patient_edit(request, pk):
+    patient = get_object_or_404(Patient, pk=pk)
+    form = PatientForm(request.POST or None, instance=patient)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Patient updated.')
+        return redirect('patient_detail', pk=pk)
+    return render(request, 'patients/form.html', {'form': form, 'patient': patient, 'page_title': f'Edit {patient.full_name}', 'active_nav': 'patients'})
+
+@login_required
+@role_required(['admin', 'reception', 'doctor', 'nurse'])
+def patient_detail(request, pk):
+    patient = get_object_or_404(Patient, pk=pk)
+    return render(request, 'patients/detail.html', {
+        'patient': patient, 'appointments': patient.appointments.order_by('-date')[:10],
+        'records': patient.records.order_by('-created_at')[:10], 'invoices': patient.invoices.order_by('-created_at')[:10],
+        'page_title': patient.full_name, 'active_nav': 'patients'
+    })
+
+
+# --- APPOINTMENTS ---
+@login_required
+@role_required(['admin', 'reception', 'doctor'])
+def appointment_list(request):
+    appointments = Appointment.objects.select_related('patient', 'doctor__user').order_by('-date', 'time')
+    return render(request, 'appointments/list.html', {'appointments': appointments, 'today': timezone.now().date(), 'page_title': 'Appointments', 'active_nav': 'appointments'})
+
+@login_required
+@role_required(['admin', 'reception'])
+def appointment_create(request):
+    form = AppointmentForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        appt = form.save(commit=False)
+        appt.created_by = request.user
+        appt.save()
+        messages.success(request, 'Appointment booked.')
+        return redirect('appointment_list')
+    return render(request, 'appointments/form.html', {'form': form, 'page_title': 'Book Appointment', 'active_nav': 'appointments'})
+
+@login_required
+@role_required(['admin', 'reception', 'doctor', 'nurse'])
+def appointment_update_status(request, pk, status):
+    appt = get_object_or_404(Appointment, pk=pk)
+    if status in dict(Appointment.STATUS):
+        appt.status = status
+        appt.save()
+        messages.success(request, f'Status updated to {status}.')
+    return redirect('appointment_list')
+
+
+# --- CALL CENTER ---
+@login_required
+@role_required(['admin', 'reception'])
+def call_center(request):
+    return render(request, 'dashboards/call_center.html', {
+        'page_title': 'Call Center', 'active_nav': 'calls',
+        'calls': CallLog.objects.select_related('patient').order_by('-started_at')[:50],
+        'callbacks': CallbackRequest.objects.filter(status='pending').select_related('patient'),
+    })
+
+@login_required
+@role_required(['admin', 'reception'])
+def callback_done(request, pk):
+    cb = get_object_or_404(CallbackRequest, pk=pk)
+    cb.status = 'done'
+    cb.handled_by = request.user
+    cb.handled_at = timezone.now()
+    cb.save()
+    messages.success(request, 'Callback marked as done.')
+    return redirect('call_center')
+
+
+# --- BILLING ---
+@login_required
+@role_required(['admin', 'reception'])
+def billing_view(request):
+    return render(request, 'invoices/list.html', {
+        'invoices': Invoice.objects.select_related('patient').order_by('-created_at'),
+        'page_title': 'Billing & Invoices', 'active_nav': 'billing',
+    })
+
+@login_required
+@role_required(['admin', 'reception'])
+def invoice_pay(request, pk):
+    inv = get_object_or_404(Invoice, pk=pk)
+    inv.status = 'paid'
+    inv.paid_at = timezone.now()
+    inv.save()
+    messages.success(request, f'Invoice #{inv.id} marked as paid.')
+    return redirect('billing_view')
+
+
+# --- PHARMACY & LAB ---
+@login_required
+@role_required(['admin', 'pharmacist'])
+def pharmacy_view(request):
+    return render(request, 'dashboards/pharmacy.html', {
+        'medicines': Medicine.objects.order_by('name'),
+        'low_stock': Medicine.objects.filter(stock__lt=20),
+        'page_title': 'Pharmacy',
+        'active_nav': 'pharmacy',
+    })
+
+@login_required
+@role_required(['admin', 'lab'])
+def lab_view(request):
+    return render(request, 'dashboards/lab.html', {
+        'lab_tests': LabTest.objects.select_related('patient', 'doctor__user').order_by('-created_at')[:50],
+        'pending_tests': LabTest.objects.exclude(status='ready').count(),
+        'page_title': 'Laboratory',
+        'active_nav': 'lab',
+    })

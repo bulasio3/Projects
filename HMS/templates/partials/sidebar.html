@@ -1,0 +1,70 @@
+<aside class="sidebar">
+  <div class="logo">
+    <i data-lucide="activity" class="logo-icon"></i>
+    Medi<span>Care</span>
+  </div>
+  
+  <nav class="nav">
+    <!-- Everyone sees Dashboard -->
+    <a href="{% url 'dashboard' %}" class="{% if active_nav == 'dashboard' %}active{% endif %}">
+      <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+    </a>
+
+    <!-- Admin & Reception -->
+    {% if current_role == 'admin' or current_role == 'reception' %}
+      <a href="{% url 'patient_list' %}" class="{% if active_nav == 'patients' %}active{% endif %}">
+        <i data-lucide="users"></i><span>Patients</span>
+      </a>
+      <a href="{% url 'appointment_list' %}" class="{% if active_nav == 'appointments' %}active{% endif %}">
+        <i data-lucide="calendar"></i><span>Appointments</span>
+      </a>
+      <a href="{% url 'call_center' %}" class="{% if active_nav == 'calls' %}active{% endif %}">
+        <i data-lucide="phone-call"></i><span>Call Center</span>
+      </a>
+      <a href="{% url 'billing_view' %}" class="{% if active_nav == 'billing' %}active{% endif %}">
+        <i data-lucide="receipt"></i><span>Billing</span>
+      </a>
+    {% endif %}
+
+    <!-- Admin & Doctors -->
+    {% if current_role == 'admin' or current_role == 'doctor' %}
+      <a href="#" class="{% if active_nav == 'doctors' %}active{% endif %}">
+        <i data-lucide="stethoscope"></i><span>Doctors</span>
+      </a>
+    {% endif %}
+
+    <!-- Admin & Pharmacist -->
+    {% if current_role == 'admin' or current_role == 'pharmacist' %}
+      <a href="{% url 'pharmacy_view' %}" class="{% if active_nav == 'pharmacy' %}active{% endif %}">
+        <i data-lucide="pill"></i><span>Pharmacy</span>
+      </a>
+    {% endif %}
+
+    <!-- Admin & Lab -->
+    {% if current_role == 'admin' or current_role == 'lab' %}
+      <a href="{% url 'lab_view' %}" class="{% if active_nav == 'lab' %}active{% endif %}">
+        <i data-lucide="flask-conical"></i><span>Laboratory</span>
+      </a>
+    {% endif %}
+
+    <!-- Admin, Nurse, Doctor -->
+    {% if current_role == 'admin' or current_role == 'nurse' or current_role == 'doctor' %}
+      <a href="#" class="{% if active_nav == 'wards' %}active{% endif %}">
+        <i data-lucide="bed-double"></i><span>Wards</span>
+      </a>
+    {% endif %}
+
+    <!-- Admin only -->
+    {% if current_role == 'admin' %}
+      <a href="#" class="{% if active_nav == 'settings' %}active{% endif %}">
+        <i data-lucide="settings"></i><span>Settings</span>
+      </a>
+    {% endif %}
+  </nav>
+
+  <div class="role-badge">
+    Logged in as
+    <strong>{{ request.user.get_full_name|default:request.user.username|truncatechars:18 }}</strong>
+    <span class="role-tag">{{ current_role_label }}</span>
+  </div>
+</aside>

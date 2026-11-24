@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Receptionist Dashboard — MediCare{% endblock %}
+
+{% block content %}
+
+<div class="stats">
+  {% include 'partials/stat_card.html' with label="Today's Appointments" value=today_appointments|length sub="Scheduled" tone="" icon="user-check" %}
+  {% include 'partials/stat_card.html' with label="Calls in Queue" value=call_queue|length sub="Live" tone="warn" icon="phone-incoming" %}
+  {% include 'partials/stat_card.html' with label="Callback Requests" value=callbacks|length sub="Pending" tone="danger" icon="phone-missed" %}
+  {% include 'partials/stat_card.html' with label="Doctors on Duty" value=doctors|length sub="Available now" tone="success" icon="stethoscope" %}
+</div>
+
+<!-- Kanban board -->
+<div class="panel" style="margin-bottom:20px;">
+  <div class="panel-head">
+    <h2><i data-lucide="layout-grid" class="head-icon"></i> Patient Flow — Live Board</h2>
+  </div>
+  <div class="kanban">
+    {% for col in kanban_columns %}
+    <div class="kanban-col">
+      <h4>{{ col.title }} <span class="count">{{ col.items|length }}</span></h4>
+      {% for item in col.items %}
+        <div class="kanban-card">
+          <strong>{{ item.patient.full_name }}</strong>
+          <span>Dr. {{ item.doctor.user.last_name }} · {{ item.time|time:"H:i" }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel-head"><h2><i data-lucide="phone-call" class="head-icon"></i> Live Call Queue</h2></div>
+    {% for call in call_queue %}
+    <div class="queue-row">
+      <div class="pos">{{ forloop.counter }}</div>
+      <div class="who">
+        <strong>{{ call.patient_name }}</strong>
+        <span>{{ call.reason }} · Waiting {{ call.wait_time }}</span>
+      </div>
+      <button class="btn-sm btn-success"><i data-lucide="phone"></i> Answer</button>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2><i data-lucide="stethoscope" class="head-icon"></i> Doctor Availability</h2></div>
+    <div class="avail-grid">
+      {% for d in doctors %}
+      <div class="avail-item {% if d.is_available %}free{% else %}busy{% endif %}">
+        <strong>Dr. {{ d.user.last_name }}</strong>
+        <span>
+          {% if d.is_available %}
+            <i data-lucide="check-circle"></i> Available
+          {% else %}
+            <i data-lucide="x-circle"></i> Busy
+          {% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

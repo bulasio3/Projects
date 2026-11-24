@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Nurse Dashboard — MediCare{% endblock %}
+
+{% block content %}
+<div class="stats">
+  {% include 'partials/stat_card.html' with label="Patients in Ward" value=today_appointments|length sub="Active" icon="bed-double" %}
+  {% include 'partials/stat_card.html' with label="Medications Due" value="—" sub="Check schedule" tone="warn" icon="pill" %}
+  {% include 'partials/stat_card.html' with label="Vitals Pending" value="—" sub="This hour" tone="danger" icon="heart-pulse" %}
+  {% include 'partials/stat_card.html' with label="Status" value="On Duty" sub="All good" tone="success" icon="check-circle" %}
+</div>
+<div class="panel">
+  <div class="panel-head"><h2><i data-lucide="bed-double" class="head-icon"></i> My Patients</h2></div>
+  <table>
+    <thead><tr><th>Patient</th><th>Doctor</th><th>Time</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for a in today_appointments %}
+      <tr>
+        <td>{{ a.patient.full_name }}</td>
+        <td>Dr. {{ a.doctor.user.last_name }}</td>
+        <td>{{ a.time|time:"H:i" }}</td>
+        <td>{% include 'partials/pill.html' with text=a.get_status_display tone="blue" %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" style="text-align:center;color:#6b7a8f;padding:20px;">No active patients.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

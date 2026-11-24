@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}{{ page_title }} — MediCare{% endblock %}
+
+{% block content %}
+
+<div class="panel" style="max-width:800px;">
+  <div class="panel-head">
+    <h2><i data-lucide="user-plus" class="head-icon"></i> {{ page_title }}</h2>
+    <a href="{% url 'patient_list' %}" class="btn-ghost"><i data-lucide="arrow-left"></i> Back</a>
+  </div>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form|crispy }}
+    <div style="margin-top:20px;display:flex;gap:10px;">
+      <button type="submit" class="btn-sm btn-success"><i data-lucide="save"></i> Save</button>
+      <a href="{% url 'patient_list' %}" class="btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Lab Dashboard — MediCare{% endblock %}
+
+{% block content %}
+<div class="stats">
+  {% include 'partials/stat_card.html' with label="Pending Tests" value=pending_tests sub="To process" tone="warn" icon="flask-conical" %}
+  {% include 'partials/stat_card.html' with label="Total Tests" value=lab_tests|length sub="All time" icon="clipboard-list" %}
+</div>
+<div class="panel">
+  <div class="panel-head"><h2><i data-lucide="flask-conical" class="head-icon"></i> Lab Test Queue</h2></div>
+  <table>
+    <thead><tr><th>Patient</th><th>Test</th><th>Doctor</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      {% for t in lab_tests %}
+      <tr>
+        <td>{{ t.patient.full_name }}</td>
+        <td>{{ t.test_name }}</td>
+        <td>Dr. {{ t.doctor.user.last_name }}</td>
+        <td>{% include 'partials/pill.html' with text=t.get_status_display tone="orange" %}</td>
+        <td>{{ t.result|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="text-align:center;color:#6b7a8f;padding:20px;">No tests.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

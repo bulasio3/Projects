@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Appointments — MediCare{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-head">
+    <h2><i data-lucide="calendar" class="head-icon"></i> All Appointments</h2>
+    <a href="{% url 'appointment_create' %}" class="btn-sm btn-success">
+      <i data-lucide="plus"></i> Book Appointment
+    </a>
+  </div>
+  <table>
+    <thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for a in appointments %}
+      <tr>
+        <td>{{ a.patient.full_name }}</td>
+        <td>Dr. {{ a.doctor.user.get_full_name }}</td>
+        <td>{{ a.date|date:"M d, Y" }}</td>
+        <td>{{ a.time|time:"H:i" }}</td>
+        <td>{{ a.reason|default:"—" }}</td>
+        <td>{% include 'partials/pill.html' with text=a.get_status_display tone="blue" %}</td>
+        <td>
+          {% if a.status == 'pending' %}
+            <a href="{% url 'appointment_status' a.pk 'confirmed' %}" class="btn-sm btn-success">Confirm</a>
+          {% elif a.status == 'confirmed' %}
+            <a href="{% url 'appointment_status' a.pk 'checked_in' %}" class="btn-sm btn-primary">Check In</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;color:#6b7a8f;padding:32px;">No appointments.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

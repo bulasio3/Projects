@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard — MediCare{% endblock %}
+
+{% block content %}
+
+<div class="stats">
+  {% include 'partials/stat_card.html' with label="Total Patients" value=total_patients sub="All registered" tone="" icon="users" %}
+  {% include 'partials/stat_card.html' with label="Appointments Today" value=appointments_today sub="Scheduled" tone="success" icon="calendar" %}
+  {% include 'partials/stat_card.html' with label="Pending Invoices" value=pending_invoices sub="Awaiting payment" tone="warn" icon="receipt" %}
+  {% include 'partials/stat_card.html' with label="System Status" value="OK" sub="All services running" tone="success" icon="activity" %}
+</div>
+
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel-head"><h2><i data-lucide="clock" class="head-icon"></i> Recent Appointments</h2></div>
+    <table>
+      <thead><tr><th>Patient</th><th>Doctor</th><th>Date / Time</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for a in recent_appointments %}
+        <tr>
+          <td>{{ a.patient.full_name }}</td>
+          <td>Dr. {{ a.doctor.user.get_full_name }}</td>
+          <td>{{ a.date|date:"M d" }} · {{ a.time|time:"H:i" }}</td>
+          <td>
+            {% if a.status == 'completed' %}{% include 'partials/pill.html' with text="Completed" tone="green" %}
+            {% elif a.status == 'confirmed' %}{% include 'partials/pill.html' with text="Confirmed" tone="blue" %}
+            {% elif a.status == 'pending' %}{% include 'partials/pill.html' with text="Pending" tone="orange" %}
+            {% elif a.status == 'cancelled' %}{% include 'partials/pill.html' with text="Cancelled" tone="red" %}
+            {% else %}{% include 'partials/pill.html' with text=a.get_status_display tone="gray" %}
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;color:#6b7a8f;padding:24px;">No appointments yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2><i data-lucide="alert-triangle" class="head-icon"></i> System Alerts</h2></div>
+    <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
+      <strong>⚠️ Low stock medicines</strong>
+      <span style="display:block;font-size:12px;color:#6b7a8f;">Check pharmacy inventory</span>
+    </div>
+    <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
+      <strong>📞 Callback requests pending</strong>
+      <span style="display:block;font-size:12px;color:#6b7a8f;">Reception follow-up needed</span>
+    </div>
+    <div style="padding:12px 0;">
+      <strong>✅ System healthy</strong>
+      <span style="display:block;font-size:12px;color:#6b7a8f;">All services running</span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

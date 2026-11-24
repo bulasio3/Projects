@@ -1,0 +1,35 @@
+<div class="modal-overlay" id="callModal">
+  <div class="call-modal">
+    <div id="stateConnecting">
+      <div class="icon-big"><i data-lucide="phone-outgoing"></i></div>
+      <h3>Connecting you...</h3>
+      <p>Finding the next available receptionist.</p>
+      <button class="btn btn-red" onclick="closeModal()">Cancel Call</button>
+    </div>
+    <div id="stateQueue" style="display:none;">
+      <div class="icon-big warn"><i data-lucide="hourglass"></i></div>
+      <h3>You're in the queue</h3>
+      <div class="queue-info">
+        <strong>Position: #2</strong><br>
+        Estimated wait: ~3 minutes<br>
+      </div>
+      <button class="btn btn-green" onclick="requestCallback()">Request Callback</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+    </div>
+    <div id="stateConnected" style="display:none;">
+      <div class="icon-big blue"><i data-lucide="headphones"></i></div>
+      <h3>Connected to Reception</h3>
+      <p>Receptionist: Grace Amoah</p>
+      <div class="queue-info blue">
+        Call will be forwarded to <strong>Dr. Kwame Adjei</strong> once available.
+      </div>
+      <button class="btn btn-red" onclick="closeModal()">End Call</button>
+    </div>
+    <div id="stateCallback" style="display:none;">
+      <div class="icon-big success"><i data-lucide="check-circle-2"></i></div>
+      <h3>Callback requested</h3>
+      <p>We'll call you back within 5 minutes.</p>
+      <button class="btn btn-green" onclick="closeModal()">Done</button>
+    </div>
+  </div>
+</div>

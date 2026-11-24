@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Pharmacy Dashboard — MediCare{% endblock %}
+
+{% block content %}
+<div class="stats">
+  {% include 'partials/stat_card.html' with label="Medicines" value=medicines|length sub="In inventory" icon="pill" %}
+  {% include 'partials/stat_card.html' with label="Low Stock" value=low_stock|length sub="Reorder soon" tone="warn" icon="alert-triangle" %}
+  {% include 'partials/stat_card.html' with label="Pending Rx" value="0" sub="To dispense" tone="danger" icon="clipboard-list" %}
+  {% include 'partials/stat_card.html' with label="Dispensed" value="0" sub="Today" tone="success" icon="check-circle" %}
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2><i data-lucide="pill" class="head-icon"></i> Inventory</h2></div>
+  <table>
+    <thead><tr><th>Medicine</th><th>Batch</th><th>Stock</th><th>Price</th><th>Expiry</th></tr></thead>
+    <tbody>
+      {% for m in medicines %}
+      <tr>
+        <td>{{ m.name }}</td>
+        <td>{{ m.batch|default:"—" }}</td>
+        <td>{% if m.stock < 20 %}{% include 'partials/pill.html' with text=m.stock tone="red" %}{% else %}{{ m.stock }}{% endif %}</td>
+        <td>${{ m.unit_price }}</td>
+        <td>{{ m.expiry_date|date:"M d, Y"|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="text-align:center;color:#6b7a8f;padding:20px;">No medicines added.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

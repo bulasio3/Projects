@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Patients — MediCare{% endblock %}
+
+{% block content %}
+
+<div class="panel" style="margin-bottom:20px;">
+  <div class="panel-head">
+    <h2><i data-lucide="users" class="head-icon"></i> All Patients ({{ patients|length }})</h2>
+    <a href="{% url 'patient_create' %}" class="btn-sm btn-success">
+      <i data-lucide="user-plus"></i> Register Patient
+    </a>
+  </div>
+
+  <form method="get" style="margin-bottom:16px;display:flex;gap:8px;">
+    <div class="input-wrap" style="flex:1;max-width:400px;">
+      <i data-lucide="search"></i>
+      <input type="text" name="q" value="{{ q }}" placeholder="Search name, code or phone...">
+    </div>
+    <button class="btn-sm btn-primary" type="submit">Search</button>
+    {% if q %}<a href="{% url 'patient_list' %}" class="btn-ghost">Clear</a>{% endif %}
+  </form>
+
+  <table>
+    <thead>
+      <tr><th>Code</th><th>Name</th><th>Gender</th><th>Age</th><th>Phone</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for p in patients %}
+      <tr>
+        <td><strong>{{ p.code }}</strong></td>
+        <td>{{ p.full_name }}</td>
+        <td>{{ p.get_gender_display }}</td>
+        <td>{{ p.age }}</td>
+        <td>{{ p.phone }}</td>
+        <td>
+          <a href="{% url 'patient_detail' p.pk %}" class="btn-sm btn-primary">
+            <i data-lucide="eye"></i> View
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;color:#6b7a8f;padding:32px;">
+        No patients yet. <a href="{% url 'patient_create' %}">Register the first one</a>.
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
