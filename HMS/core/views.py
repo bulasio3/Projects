@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
 from .models import *
-from .forms import PatientForm, AppointmentForm
+from .forms import PatientForm, AppointmentForm, StaffUserForm
 from django.core.exceptions import PermissionDenied
 from functools import wraps
 
@@ -235,4 +235,57 @@ def lab_view(request):
         'pending_tests': LabTest.objects.exclude(status='ready').count(),
         'page_title': 'Laboratory',
         'active_nav': 'lab',
+    })
+ 
+# --- ADMIN USER MANAGEMENT ---
+@login_required
+@role_required(['admin'])
+def user_list(request):
+    q = request.GET.get('q', '').strip()
+    users = User.objects.all().order_by('role', 'username')
+    if q:
+        users = users.filter(
+            Q(username__icontains=q) |
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(email__icontains=q)
+        )
+    return render(request, 'users/list.html', {
+        'users': users, 'q': q,
+        'page_title': 'User & Role Management', 'active_nav': 'users',
+    })
+
+
+@login_required
+@role_required(['admin'])
+def user_create(request):
+    form = StaffUserForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        user = form.save()
+        messages.success(request, f'Account for {user.username} created.')
+        return redirect('user_list')
+    return render(request, 'users/form.html', {
+        'form': form, 'page_title': 'Create User Account', 'active_nav': 'users',
+    })
+
+
+@login_required
+@role_required(['admin'])
+def user_edit(request, pk):
+    account = get_object_or_404(User, pk=pk)
+    form = StaffUserForm(request.POST or None, instance=account)
+    if request.method == 'POST' and form.is_valid():
+        new_role = form.cleaned_data['role']
+        new_active = form.cleaned_data['is_active']
+        if account.pk == request.user.pk and (new_role != 'admin' or not new_active):
+            form.add_error(None, 'You cannot remove administrator access or deactivate your own account.')
+        elif account.role == 'admin' and account.is_active and (new_role != 'admin' or not new_active) and User.objects.filter(role='admin', is_active=True).count() <= 1:
+            form.add_error(None, 'You cannot remove or deactivate the last active administrator.')
+        else:
+            user = form.save()
+            messages.success(request, f'Account for {user.username} updated.')
+            return redirect('user_list')
+    return render(request, 'users/form.html', {
+        'form': form, 'account': account,
+        'page_title': f'Edit Account: {account.username}', 'active_nav': 'users',
     })
