@@ -23,6 +23,9 @@ urlpatterns = [
     path('calls/', views.call_center, name='call_center'),
     path('calls/callback/<int:pk>/done/', views.callback_done, name='callback_done'),
 
-   path('invoices/', views.billing_view, name='invoice_list'),
+   path('pharmacy/', views.pharmacy_view, name='pharmacy_view'),
+    path('laboratory/', views.lab_view, name='lab_view'),
+
+    path('invoices/', views.billing_view, name='invoice_list'),
     path('invoices/<int:pk>/pay/', views.invoice_pay, name='invoice_pay'),
 ]
