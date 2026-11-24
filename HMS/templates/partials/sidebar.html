@@ -56,6 +56,9 @@
 
     <!-- Admin only -->
     {% if current_role == 'admin' %}
+      <a href="{% url 'user_list' %}" class="{% if active_nav == 'users' %}active{% endif %}">
+        <i data-lucide="user-cog"></i><span>Users & Roles</span>
+      </a>
       <a href="#" class="{% if active_nav == 'settings' %}active{% endif %}">
         <i data-lucide="settings"></i><span>Settings</span>
       </a>
