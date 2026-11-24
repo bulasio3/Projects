@@ -21,7 +21,7 @@
       <a href="{% url 'call_center' %}" class="{% if active_nav == 'calls' %}active{% endif %}">
         <i data-lucide="phone-call"></i><span>Call Center</span>
       </a>
-      <a href="{% url 'billing_view' %}" class="{% if active_nav == 'billing' %}active{% endif %}">
+      <a href="{% url 'invoice_list' %}" class="{% if active_nav == 'billing' %}active{% endif %}">
         <i data-lucide="receipt"></i><span>Billing</span>
       </a>
     {% endif %}
