@@ -40,8 +40,12 @@ def home_redirect(request):
 
 @login_required
 def dashboard(request):
-    role = getattr(request.user, 'role', 'patient')
-    template = ROLE_TEMPLATES.get(role, ROLE_TEMPLATES['patient'])
+    role = getattr(request.user, 'role', None)
+    if role not in ROLE_TEMPLATES:
+        raise PermissionDenied(
+            'Your account does not have a supported dashboard role.'
+        )
+    template = ROLE_TEMPLATES[role]
     today = timezone.now().date()
 
     ctx = {'page_title': ROLE_TITLES[role], 'active_nav': 'dashboard', 'today': today}
