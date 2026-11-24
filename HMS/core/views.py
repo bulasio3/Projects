@@ -55,6 +55,10 @@ def dashboard(request):
             'total_patients': Patient.objects.count(),
             'appointments_today': Appointment.objects.filter(date=today).count(),
             'pending_invoices': Invoice.objects.filter(status='unpaid').count(),
+            'total_staff': User.objects.exclude(role='patient').count(),
+            'low_stock_medicines': Medicine.objects.filter(stock__lt=20).count(),
+            'pending_callbacks': CallbackRequest.objects.filter(status='pending').count(),
+            'pending_lab_tests': LabTest.objects.exclude(status__in=['ready', 'cancelled']).count(),
             'recent_appointments': Appointment.objects.select_related('patient', 'doctor__user').order_by('-created_at')[:6],
         })
     elif role == 'reception':
