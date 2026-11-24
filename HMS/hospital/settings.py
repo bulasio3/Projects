@@ -10,6 +10,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 # --- RENDER ALLOWED HOSTS ---
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://medical-g59d.onrender.com']
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
