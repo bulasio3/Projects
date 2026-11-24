@@ -184,3 +184,14 @@ tr:hover td { background:#f9fbfd; }
   .kanban { grid-template-columns:repeat(2,1fr); }
   .avail-grid { grid-template-columns:1fr; }
 }
+
+/* ============ SECURE SIDEBAR LOGOUT ============ */
+.sidebar-logout { padding:0 20px 12px; }
+.sidebar-logout button { width:100%; display:flex; align-items:center; justify-content:flex-start; gap:12px; padding:11px 14px; border:1px solid rgba(255,255,255,.18); border-radius:8px; background:rgba(231,76,60,.12); color:#ffd6d2; font:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:background .2s,border-color .2s; }
+.sidebar-logout button:hover { background:rgba(231,76,60,.25); border-color:rgba(255,255,255,.35); color:#fff; }
+.sidebar-logout button [data-lucide] { width:17px; height:17px; }
+@media (max-width:1000px) {
+  .sidebar-logout { padding:0 10px 12px; }
+  .sidebar-logout button { justify-content:center; padding:11px 6px; }
+  .sidebar-logout button span { display:none; }
+}
