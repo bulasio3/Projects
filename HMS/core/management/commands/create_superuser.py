@@ -1,1 +1,25 @@
 
+import os
+from django.core.management.base import BaseCommand
+from django.contrib.auth import get_user_model
+from django.db import transaction
+
+class Command(BaseCommand):
+    help = 'Create superuser from environment variables'
+
+    def handle(self, *args, **options):
+        User = get_user_model()
+        username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+        email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+        password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+
+        if not username or not password:
+            self.stdout.write(self.style.WARNING('Skipping superuser creation: DJANGO_SUPERUSER_USERNAME or DJANGO_SUPERUSER_PASSWORD not set.'))
+            return
+
+        with transaction.atomic():
+            if User.objects.filter(username=username).exists():
+                self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" already exists.'))
+            else:
+                User.objects.create_superuser(username=username, email=email, password=password)
+                self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created successfully.'))
