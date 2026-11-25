@@ -30,12 +30,20 @@
 </script>
 {% endblock %}
 {% block content %}
+<style>
+.settings-page-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px;padding:6px;background:#f3f6fa;border:1px solid #e6ebf1;border-radius:12px;width:fit-content;max-width:100%}.settings-page-tab{display:inline-flex;align-items:center;gap:9px;padding:11px 15px;border-radius:8px;text-decoration:none;color:#617187;font-size:13px;font-weight:700;transition:.2s}.settings-page-tab:hover{background:#fff;color:#0f766e}.settings-page-tab.active{background:#fff;color:#102a43;box-shadow:0 2px 8px #152b4512}.settings-page-tab svg{width:16px;height:16px}.settings-page-tab .tab-arrow{width:13px;height:13px;opacity:.6}
+</style>
+
 <div class="panel" style="margin-bottom:20px;">
   <div class="panel-head">
     <h2><i data-lucide="settings" class="head-icon"></i> Hospital Settings</h2>
     <span class="pill green">Administrator</span>
   </div>
   <p style="color:#6b7a8f;margin:0 0 20px;">Manage the hospital's operational setup. Changes made here are saved to the hospital database.</p>
+  <nav class="settings-page-tabs" aria-label="Settings pages">
+    <a class="settings-page-tab active" href="{% url 'hospital_settings' %}"><i data-lucide="sliders-horizontal"></i> General settings</a>
+    <a class="settings-page-tab" href="{% url 'security_access' %}"><i data-lucide="shield-check"></i> Security &amp; Access <i data-lucide="arrow-up-right" class="tab-arrow"></i></a>
+  </nav>
   <section class="appointment-config-section hospital-profile-section" id="hospital-profile-section">
     <div class="appointment-config-heading">
       <div>
