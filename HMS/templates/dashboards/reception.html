@@ -22,7 +22,7 @@
       {% for item in col.items %}
         <div class="kanban-card">
           <strong>{{ item.patient.full_name }}</strong>
-          <span>Dr. {{ item.doctor.user.last_name }} · {{ item.time|time:"H:i" }}</span>
+          <span>Dr. {{ item.doctor.user.last_name }} · {{ item.time|time:system_time_format }}</span>
         </div>
       {% endfor %}
     </div>
