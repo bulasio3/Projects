@@ -37,7 +37,7 @@
       <tbody>
         {% for a in appointments %}
         <tr>
-          <td>{{ a.date|date:"M d, Y" }} · {{ a.time|time:"H:i" }}</td>
+          <td>{{ a.date|date:system_date_format }} · {{ a.time|time:system_time_format }}</td>
           <td>Dr. {{ a.doctor.user.get_full_name }}</td>
           <td>{% include 'partials/pill.html' with text=a.get_status_display tone="blue" %}</td>
         </tr>
@@ -55,8 +55,8 @@
       <tbody>
         {% for i in invoices %}
         <tr>
-          <td>{{ i.created_at|date:"M d" }}</td>
-          <td>{{ currency_code }} {{ i.total|floatformat:2 }}</td>
+          <td>{{ i.created_at|date:system_date_format }}</td>
+          <td>{{ currency_code|default:system_currency }} {{ i.total|floatformat:2 }}</td>
           <td>{% include 'partials/pill.html' with text=i.get_status_display tone="orange" %}</td>
         </tr>
         {% empty %}
