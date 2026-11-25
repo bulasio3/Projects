@@ -207,7 +207,11 @@ def patient_detail(request, pk):
 @login_required
 @role_required(['admin', 'reception', 'doctor'])
 def appointment_list(request):
-    appointments = Appointment.objects.select_related('patient', 'doctor__user').order_by('-date', 'time')
+    appointments = Appointment.objects.select_related('patient', 'doctor__user')
+    if request.user.role == 'doctor':
+        doctor = Doctor.objects.filter(user=request.user).first()
+        appointments = appointments.filter(doctor=doctor) if doctor else appointments.none()
+    appointments = appointments.order_by('-date', 'time')
     return render(request, 'appointments/list.html', {'appointments': appointments, 'today': timezone.now().date(), 'page_title': 'Appointments', 'active_nav': 'appointments'})
 
 @login_required
@@ -226,10 +230,14 @@ def appointment_create(request):
 @role_required(['admin', 'reception', 'doctor', 'nurse'])
 def appointment_update_status(request, pk, status):
     appt = get_object_or_404(Appointment, pk=pk)
+    if request.user.role == 'doctor':
+        doctor = Doctor.objects.filter(user=request.user).first()
+        if not doctor or appt.doctor_id != doctor.pk:
+            raise PermissionDenied
     if status in dict(Appointment.STATUS):
         appt.status = status
         appt.save()
-        messages.success(request, f'Status updated to {status}.')
+        messages.success(request, f'Status updated to {appt.get_status_display()}.')
     return redirect('appointment_list')
 
 
