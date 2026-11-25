@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Appointment
+from .models import Patient, Appointment, HospitalSettings
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -51,3 +51,14 @@ class StaffUserForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class HospitalSettingsForm(forms.ModelForm):
+    class Meta:
+        model = HospitalSettings
+        fields = ['hospital_name', 'logo_url', 'address', 'telephone', 'email', 'operating_hours']
+        widgets = {
+            'address': forms.Textarea(attrs={'rows': 3}),
+            'logo_url': forms.URLInput(attrs={'placeholder': 'https://example.com/hospital-logo.png'}),
+            'operating_hours': forms.TextInput(attrs={'placeholder': 'e.g. Monday–Sunday, 24 hours'}),
+        }
