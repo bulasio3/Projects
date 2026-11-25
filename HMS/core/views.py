@@ -372,3 +372,30 @@ def hospital_settings(request):
         'page_title': 'Hospital Settings',
         'active_nav': 'settings',
     })
+
+
+# --- SECURITY & ACCESS ---
+@login_required
+@role_required(['admin'])
+def security_access(request):
+    staff_users = User.objects.exclude(role='patient')
+    role_summary = []
+    for role_value, role_label in User.ROLE_CHOICES:
+        if role_value == 'patient':
+            continue
+        role_summary.append({
+            'label': role_label,
+            'total': staff_users.filter(role=role_value).count(),
+            'active': staff_users.filter(role=role_value, is_active=True).count(),
+        })
+    context = {
+        'page_title': 'Security & Access',
+        'active_nav': 'settings',
+        'total_staff': staff_users.count(),
+        'active_staff': staff_users.filter(is_active=True).count(),
+        'inactive_staff': staff_users.filter(is_active=False).count(),
+        'active_admins': User.objects.filter(role='admin', is_active=True).count(),
+        'recent_accounts': staff_users.order_by('-date_joined')[:8],
+        'role_summary': role_summary,
+    }
+    return render(request, 'settings/security_access.html', context)
