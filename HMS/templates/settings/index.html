@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Hospital Settings — MediCare{% endblock %}
+{% block content %}
+<div class="panel" style="margin-bottom:20px;">
+  <div class="panel-head">
+    <h2><i data-lucide="settings" class="head-icon"></i> Hospital Settings</h2>
+    <span class="pill green">Administrator</span>
+  </div>
+  <p style="color:#6b7a8f;margin:0 0 20px;">Manage the hospital's operational setup. Changes made here are saved to the hospital database.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:22px;">
+    <div style="padding:16px;border:1px solid #e5eaf0;border-radius:10px;">
+      <div style="color:#6b7a8f;font-size:12px;">Departments</div>
+      <strong style="font-size:24px;">{{ departments|length }}</strong>
+    </div>
+    <div style="padding:16px;border:1px solid #e5eaf0;border-radius:10px;">
+      <div style="color:#6b7a8f;font-size:12px;">Registered doctors</div>
+      <strong style="font-size:24px;">{{ doctor_count }}</strong>
+    </div>
+  </div>
+  <h3 style="margin:0 0 12px;">Department management</h3>
+  <p style="color:#6b7a8f;font-size:13px;margin:0 0 16px;">Create hospital departments such as Emergency, Pediatrics, Surgery and Maternity. Doctors can then be assigned to these departments.</p>
+  <form method="post" style="display:grid;grid-template-columns:1fr 1.5fr auto;gap:10px;align-items:end;margin-bottom:22px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="add_department">
+    <label style="font-size:13px;color:#465568;">Department name
+      <input required maxlength="100" name="name" placeholder="e.g. Pediatrics" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #d0d7de;border-radius:7px;">
+    </label>
+    <label style="font-size:13px;color:#465568;">Description
+      <input name="description" placeholder="Brief description (optional)" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #d0d7de;border-radius:7px;">
+    </label>
+    <button type="submit" class="btn-sm btn-primary" style="padding:11px 16px;">Add department</button>
+  </form>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Department</th><th>Description</th><th>Doctors assigned</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for department in departments %}
+        <tr>
+          <td><strong>{{ department.name }}</strong></td>
+          <td>{{ department.description|default:"—" }}</td>
+          <td>{{ department.doctor_set.count }}</td>
+          <td>
+            <form method="post" onsubmit="return confirm('Delete this department?');">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete_department">
+              <input type="hidden" name="department_id" value="{{ department.pk }}">
+              <button type="submit" class="btn-ghost" {% if department.doctor_set.count %}disabled title="Assigned to a doctor"{% endif %}>Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;padding:24px;color:#6b7a8f;">No departments have been created yet. Add the first department above.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:#6b7a8f;margin-top:14px;">A department linked to a doctor is protected from deletion to preserve existing records.</p>
+</div>
+{% endblock %}
