@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}{{ page_title }} — MediCare{% endblock %}
+{% block title %}{{ page_title }} — MediCare<script>
+(function(){
+  const role=document.getElementById('id_role');
+  const section=document.getElementById('doctor-profile-fields');
+  function toggleDoctorFields(){ if(role && section){ section.style.display=role.value==='doctor'?'block':'none'; } }
+  if(role){ role.addEventListener('change',toggleDoctorFields); toggleDoctorFields(); }
+})();
+</script>
+{% endblock %}
 {% block content %}
 <div class="panel" style="max-width:760px;">
   <div class="panel-head"><h2><i data-lucide="user-cog" class="head-icon"></i> {{ page_title }}</h2></div>
@@ -15,6 +23,19 @@
         {% for error in field.errors %}<small style="display:block;color:#c0392b;margin-top:4px;">{{ error }}</small>{% endfor %}
       </div>
     {% endfor %}
+    <section id="doctor-profile-fields" style="display:none;margin:22px 0;padding:18px;border:1px solid #d9e4ec;border-radius:12px;background:#f7fafc;">
+      <h3 style="margin:0 0 6px;color:#18324b;font-size:16px;">Doctor profile details</h3>
+      <p style="margin:0 0 16px;color:#6b7a8f;font-size:13px;">These details create or update the doctor's clinical directory profile.</p>
+      {% for field in form %}
+        {% if field.name == 'specialization' or field.name == 'department' or field.name == 'license_no' or field.name == 'consultation_fee' %}
+          <div style="margin-bottom:14px;">
+            <label for="{{ field.id_for_label }}" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<small style="display:block;color:#c0392b;margin-top:4px;">{{ error }}</small>{% endfor %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </section>
     <div style="display:flex;gap:10px;align-items:center;">
       <button class="btn-sm btn-primary" type="submit">Save account</button>
       <a class="btn-ghost" href="{% url 'user_list' %}">Cancel</a>
