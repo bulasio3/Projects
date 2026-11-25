@@ -200,8 +200,10 @@ def callback_done(request, pk):
 @login_required
 @role_required(['admin', 'reception'])
 def billing_view(request):
+    preferences, _ = SystemPreferences.objects.get_or_create(pk=1)
     return render(request, 'invoices/list.html', {
         'invoices': Invoice.objects.select_related('patient').order_by('-created_at'),
+        'currency_code': preferences.currency,
         'page_title': 'Billing & Invoices', 'active_nav': 'billing',
     })
 
