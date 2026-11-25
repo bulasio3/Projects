@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Appointment, HospitalSettings
+from .models import Patient, Appointment, HospitalSettings, AppointmentConfiguration
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -62,3 +62,29 @@ class HospitalSettingsForm(forms.ModelForm):
             'logo_url': forms.URLInput(attrs={'placeholder': 'https://example.com/hospital-logo.png'}),
             'operating_hours': forms.TextInput(attrs={'placeholder': 'e.g. Monday–Sunday, 24 hours'}),
         }
+
+
+class AppointmentConfigurationForm(forms.ModelForm):
+    class Meta:
+        model = AppointmentConfiguration
+        fields = [
+            'appointment_duration', 'monday', 'tuesday', 'wednesday',
+            'thursday', 'friday', 'saturday', 'sunday', 'opening_time',
+            'closing_time', 'max_appointments_per_doctor', 'online_booking_enabled',
+        ]
+        widgets = {
+            'appointment_duration': forms.Select(),
+            'opening_time': forms.TimeInput(attrs={'type': 'time'}),
+            'closing_time': forms.TimeInput(attrs={'type': 'time'}),
+            'max_appointments_per_doctor': forms.NumberInput(attrs={'min': 1, 'max': 100}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        opening = cleaned.get('opening_time')
+        closing = cleaned.get('closing_time')
+        if opening and closing and closing <= opening:
+            self.add_error('closing_time', 'Closing time must be later than opening time.')
+        if not any(cleaned.get(day) for day in ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')):
+            raise forms.ValidationError('Select at least one working day.')
+        return cleaned
