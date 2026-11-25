@@ -262,3 +262,68 @@ tr:hover td { background:#f9fbfd; }
   .stat-card .value { font-size:24px; }
   .admin-dashboard-grid .panel { padding:16px; }
 }
+
+
+/* ============ APPOINTMENT CONFIGURATION ============ */
+.appointment-config-section { margin:22px 0; padding:24px; border:1px solid #e5edf2; border-radius:15px; background:linear-gradient(135deg,#fff 0%,#fbfefe 100%); box-shadow:0 5px 18px rgba(28,53,82,.045); }
+.appointment-config-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
+.appointment-config-heading h3 { color:#203650; font-size:19px; margin:0 0 5px; }
+.appointment-config-heading p { color:#718096; font-size:12px; margin:0; }
+.config-live-pill { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:20px; background:#eaf8f5; color:#168b79; font-size:11px; font-weight:700; white-space:nowrap; }
+.config-live-pill span { width:7px; height:7px; border-radius:50%; background:#22ad83; box-shadow:0 0 0 4px #d7f2e9; }
+.appointment-config-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; }
+.config-card { min-width:0; padding:18px; border:1px solid #e8eef3; border-radius:12px; background:#fff; transition:border-color .18s,transform .18s,box-shadow .18s; }
+.config-card:hover { border-color:#b9e3df; transform:translateY(-2px); box-shadow:0 7px 18px rgba(28,53,82,.055); }
+.config-card-title { display:flex; align-items:center; gap:11px; margin-bottom:17px; }
+.config-icon { width:38px; height:38px; display:flex; align-items:center; justify-content:center; flex-shrink:0; border-radius:11px; background:#e7f7f5; color:#159b9b; }
+.config-icon svg { width:19px; height:19px; }
+.config-card-title strong,.config-card-title small { display:block; }
+.config-card-title strong { color:#2c4058; font-size:13px; margin-bottom:3px; }
+.config-card-title small { color:#8996a5; font-size:10px; line-height:1.4; }
+.config-field { display:flex; flex-direction:column; gap:7px; color:#56667a; font-size:11px; font-weight:700; }
+.config-field select,.config-field input { width:100%; box-sizing:border-box; padding:11px 12px; border:1px solid #dce5ec; border-radius:8px; background:#fbfcfd; color:#263d58; font:inherit; font-size:13px; outline:none; transition:border .2s,box-shadow .2s; }
+.config-field select:focus,.config-field input:focus { border-color:#159b9b; box-shadow:0 0 0 3px rgba(21,155,155,.12); background:#fff; }
+.duration-options { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+.duration-options button { padding:7px 11px; border:1px solid #dce7ed; border-radius:7px; background:#fff; color:#637287; font-size:11px; font-weight:700; cursor:pointer; transition:.18s; }
+.duration-options button:hover,.duration-options button.active { border-color:#159b9b; background:#e9f8f6; color:#118786; }
+.working-day-picker { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
+.day-choice { position:relative; display:flex; align-items:center; justify-content:center; min-height:39px; border:1px solid #e1e9ef; border-radius:8px; background:#fafcfd; color:#718096; cursor:pointer; transition:.18s; }
+.day-choice input { position:absolute; opacity:0; width:1px; height:1px; }
+.day-choice span { font-size:10px; font-weight:800; }
+.day-choice.selected { border-color:#159b9b; background:#e7f7f5; color:#118786; box-shadow:inset 0 0 0 1px rgba(21,155,155,.12); }
+.day-choice:focus-within { outline:2px solid rgba(21,155,155,.35); outline-offset:2px; }
+.config-hint { display:block; color:#8996a5; font-size:10px; line-height:1.5; margin-top:10px; }
+.time-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.capacity-preview { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:11px 12px; margin-top:12px; border-radius:8px; background:#f1f8fa; color:#738297; font-size:10px; }
+.capacity-preview strong { color:#1d7f83; font-size:11px; }
+.online-toggle { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px; border:1px solid #e7edf2; border-radius:10px; background:#fbfcfd; cursor:pointer; }
+.online-toggle strong,.online-toggle small { display:block; }
+.online-toggle strong { color:#30455d; font-size:12px; margin-bottom:4px; }
+.online-toggle small { color:#8996a5; font-size:10px; }
+.switch-control { position:relative; display:inline-flex; flex-shrink:0; }
+.switch-control input { position:absolute; opacity:0; width:1px; height:1px; }
+.switch-track { width:43px; height:24px; border-radius:20px; background:#cbd5df; transition:.2s; }
+.switch-track:after { content:""; display:block; width:18px; height:18px; margin:3px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.18); transition:.2s; }
+.switch-control input:checked + .switch-track { background:#159b9b; }
+.switch-control input:checked + .switch-track:after { transform:translateX(19px); }
+.switch-control input:focus-visible + .switch-track { outline:3px solid rgba(21,155,155,.25); outline-offset:2px; }
+.schedule-preview { display:flex; align-items:center; gap:14px; padding:17px 19px; margin-top:17px; border:1px solid #dcefeb; border-radius:12px; background:linear-gradient(100deg,#effaf8,#f5fbfd); }
+.schedule-preview-icon { width:42px; height:42px; display:flex; align-items:center; justify-content:center; border-radius:11px; background:#d8f2ed; color:#168f88; }
+.schedule-preview-icon svg { width:21px; height:21px; }
+.schedule-preview-copy { flex:1; min-width:0; }
+.schedule-preview-copy span,.schedule-preview-copy strong,.schedule-preview-copy small,.schedule-preview-duration strong,.schedule-preview-duration small { display:block; }
+.schedule-preview-copy span { color:#168f88; font-size:9px; font-weight:800; letter-spacing:1px; margin-bottom:4px; }
+.schedule-preview-copy strong { color:#263d58; font-size:15px; }
+.schedule-preview-copy small { color:#77889a; font-size:10px; margin-top:3px; }
+.schedule-preview-duration { text-align:right; }
+.schedule-preview-duration strong { color:#168f88; font-size:17px; }
+.schedule-preview-duration small { color:#8996a5; font-size:10px; }
+.config-actions { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-top:17px; }
+.config-actions > span { display:flex; align-items:center; gap:6px; color:#8290a1; font-size:10px; }
+.config-actions > span svg { width:15px; height:15px; color:#159b9b; }
+.config-actions button { display:inline-flex; align-items:center; gap:7px; padding:11px 16px; border:0; border-radius:8px; background:#1e3a5f; color:#fff; font-size:11px; font-weight:700; cursor:pointer; transition:.18s; }
+.config-actions button:hover { background:#159b9b; transform:translateY(-1px); }
+.config-actions button svg { width:15px; height:15px; }
+.config-error { display:block; color:#b42318; font-size:11px; margin-top:7px; }
+@media(max-width:760px) { .appointment-config-grid { grid-template-columns:1fr; } .appointment-config-section { padding:17px; } }
+@media(max-width:520px) { .appointment-config-heading,.config-actions { align-items:flex-start; flex-direction:column; } .working-day-picker { gap:4px; } .day-choice { min-height:35px; } .day-choice span { font-size:9px; } .time-fields { grid-template-columns:1fr; } .schedule-preview { padding:13px; gap:9px; } .schedule-preview-copy strong { font-size:12px; } }
