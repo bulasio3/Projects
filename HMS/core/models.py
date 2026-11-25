@@ -251,3 +251,42 @@ class NotificationSettings(models.Model):
 
     def __str__(self):
         return 'Hospital notification preferences'
+
+
+class SystemPreferences(models.Model):
+    """Hospital-wide display and regional preferences."""
+    CURRENCY_CHOICES = [
+        ('UGX', 'UGX — Ugandan Shilling'),
+        ('USD', 'USD — US Dollar'),
+        ('KES', 'KES — Kenyan Shilling'),
+        ('TZS', 'TZS — Tanzanian Shilling'),
+        ('RWF', 'RWF — Rwandan Franc'),
+        ('EUR', 'EUR — Euro'),
+        ('GBP', 'GBP — British Pound'),
+    ]
+    DATE_FORMAT_CHOICES = [
+        ('d/m/Y', 'DD/MM/YYYY'),
+        ('Y-m-d', 'YYYY-MM-DD'),
+        ('m/d/Y', 'MM/DD/YYYY'),
+    ]
+    TIME_ZONE_CHOICES = [
+        ('Africa/Kampala', 'Africa/Kampala — East Africa Time'),
+        ('Africa/Nairobi', 'Africa/Nairobi — East Africa Time'),
+        ('Africa/Dar_es_Salaam', 'Africa/Dar es Salaam — East Africa Time'),
+        ('Africa/Kigali', 'Africa/Kigali — Central Africa Time'),
+        ('UTC', 'UTC — Coordinated Universal Time'),
+    ]
+    TIME_FORMAT_CHOICES = [('24', '24-hour clock'), ('12', '12-hour clock')]
+
+    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='UGX')
+    date_format = models.CharField(max_length=10, choices=DATE_FORMAT_CHOICES, default='d/m/Y')
+    time_zone = models.CharField(max_length=50, choices=TIME_ZONE_CHOICES, default='Africa/Kampala')
+    time_format = models.CharField(max_length=2, choices=TIME_FORMAT_CHOICES, default='24')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return 'Hospital system preferences'
