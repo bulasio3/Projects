@@ -77,7 +77,7 @@ def dashboard(request):
             'kanban_columns': kanban_columns,
         })
     elif role == 'doctor':
-        doctor = Doctor.objects.filter(user=request.user).first()
+        doctor = Doctor.objects.select_related('department', 'user').filter(user=request.user).first()
         if doctor:
             doctor_appointments = Appointment.objects.filter(doctor=doctor)
             today_appointments = doctor_appointments.filter(date=today).select_related('patient').order_by('time')
@@ -87,16 +87,33 @@ def dashboard(request):
             pending_labs = LabTest.objects.filter(
                 doctor=doctor
             ).exclude(status__in=['ready', 'cancelled']).select_related('patient').order_by('-created_at')[:5]
+            ready_labs = LabTest.objects.filter(
+                doctor=doctor, status='ready'
+            ).select_related('patient').order_by('-completed_at', '-created_at')[:6]
             recent_records = MedicalRecord.objects.filter(
                 doctor=doctor
             ).select_related('patient').order_by('-created_at')[:5]
+            patient_search = request.GET.get('q', '').strip()
+            my_patients = Patient.objects.filter(
+                appointments__doctor=doctor
+            ).distinct()
+            if patient_search:
+                my_patients = my_patients.filter(
+                    Q(full_name__icontains=patient_search) |
+                    Q(code__icontains=patient_search) |
+                    Q(phone__icontains=patient_search) |
+                    Q(email__icontains=patient_search)
+                )
             ctx.update({
                 'doctor_profile': doctor,
                 'my_appointments': today_appointments,
                 'upcoming_appointments': upcoming_appointments,
                 'pending_labs': pending_labs,
+                'ready_labs': ready_labs,
                 'recent_records': recent_records,
-                'patient_count': Patient.objects.filter(appointments__doctor=doctor).distinct().count(),
+                'patient_search': patient_search,
+                'patient_search_results': my_patients.order_by('full_name')[:8] if patient_search else Patient.objects.none(),
+                'patient_count': my_patients.count() if not patient_search else Patient.objects.filter(appointments__doctor=doctor).distinct().count(),
                 'completed_count': today_appointments.filter(status='completed').count(),
                 'pending_count': today_appointments.filter(
                     status__in=['pending', 'confirmed', 'checked_in', 'in_progress']
@@ -105,6 +122,8 @@ def dashboard(request):
                 'pending_lab_count': LabTest.objects.filter(
                     doctor=doctor
                 ).exclude(status__in=['ready', 'cancelled']).count(),
+                'ready_lab_count': LabTest.objects.filter(doctor=doctor, status='ready').count(),
+                'clinical_record_count': MedicalRecord.objects.filter(doctor=doctor).count(),
             })
         else:
             ctx.update({
@@ -112,12 +131,17 @@ def dashboard(request):
                 'my_appointments': Appointment.objects.none(),
                 'upcoming_appointments': Appointment.objects.none(),
                 'pending_labs': LabTest.objects.none(),
+                'ready_labs': LabTest.objects.none(),
                 'recent_records': MedicalRecord.objects.none(),
+                'patient_search': '',
+                'patient_search_results': Patient.objects.none(),
                 'patient_count': 0,
                 'completed_count': 0,
                 'pending_count': 0,
                 'today_appointment_count': 0,
                 'pending_lab_count': 0,
+                'ready_lab_count': 0,
+                'clinical_record_count': 0,
             })
     elif role == 'patient':
         patient = getattr(request.user, 'patient', None)
