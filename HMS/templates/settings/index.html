@@ -191,6 +191,58 @@
     </form>
   </section>
 
+
+  <section class="appointment-config-section" id="notification-settings-section">
+    <div class="appointment-config-heading">
+      <div>
+        <span class="panel-kicker">COMMUNICATION & ALERTS</span>
+        <h3>Notification preferences</h3>
+        <p>Choose which hospital events should generate alerts and how staff should receive them.</p>
+      </div>
+      <span class="config-live-pill"><span></span> Live preferences</span>
+    </div>
+    <form method="post" id="notification-settings-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_notifications">
+      <div class="appointment-config-grid">
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="calendar-clock"></i></span><div><strong>Appointment reminders</strong><small>Remind patients about upcoming consultations</small></div></div>
+          <label class="online-toggle"><span><strong>Appointment reminders</strong><small>Send a reminder before the appointment date and time.</small></span><span class="switch-control">{{ notification_form.appointment_reminders }}<span class="switch-track"></span></span></label>
+          <label class="config-field" style="margin-top:16px;">Reminder timing {{ notification_form.reminder_hours_before }}</label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="wallet"></i></span><div><strong>Payment alerts</strong><small>Keep relevant staff informed about billing activity</small></div></div>
+          <label class="online-toggle"><span><strong>Payment notifications</strong><small>Alerts for payment and invoice status updates.</small></span><span class="switch-control">{{ notification_form.payment_alerts }}<span class="switch-track"></span></span></label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="test-tube"></i></span><div><strong>Laboratory notifications</strong><small>Notify relevant staff when test results are ready</small></div></div>
+          <label class="online-toggle"><span><strong>Lab result alerts</strong><small>Updates when laboratory results become available.</small></span><span class="switch-control">{{ notification_form.lab_result_alerts }}<span class="switch-track"></span></span></label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="package-warning"></i></span><div><strong>Inventory alerts</strong><small>Help the pharmacy team monitor medicine stock</small></div></div>
+          <label class="online-toggle"><span><strong>Low-stock alerts</strong><small>Notify staff when medicine stock is running low.</small></span><span class="switch-control">{{ notification_form.low_stock_alerts }}<span class="switch-track"></span></span></label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="mail"></i></span><div><strong>Email delivery</strong><small>Preferred channel for official hospital updates</small></div></div>
+          <label class="online-toggle"><span><strong>Email notifications</strong><small>Enable email as a notification channel.</small></span><span class="switch-control">{{ notification_form.email_notifications }}<span class="switch-track"></span></span></label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="message-square"></i></span><div><strong>SMS delivery</strong><small>Use text messages for time-sensitive updates</small></div></div>
+          <label class="online-toggle"><span><strong>SMS notifications</strong><small>Enable SMS as a notification channel.</small></span><span class="switch-control">{{ notification_form.sms_notifications }}<span class="switch-track"></span></span></label>
+        </div>
+      </div>
+      <div class="schedule-preview">
+        <div class="schedule-preview-icon"><i data-lucide="bell-ring"></i></div>
+        <div class="schedule-preview-copy"><span>NOTIFICATION CHANNELS</span><strong id="notification-channel-preview">Email enabled · SMS disabled</strong><small id="notification-event-preview">4 alert categories enabled</small></div>
+      </div>
+      <div class="config-actions">
+        <span><i data-lucide="shield-check"></i> Preferences are saved securely in the hospital database.</span>
+        <button type="submit" class="btn-sm btn-primary"><i data-lucide="save"></i> Save notification settings</button>
+      </div>
+      {% if notification_form.non_field_errors %}<div class="config-error">{{ notification_form.non_field_errors }}</div>{% endif %}
+    </form>
+  </section>
+
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:22px;">
     <div style="padding:16px;border:1px solid #e5eaf0;border-radius:10px;">
       <div style="color:#6b7a8f;font-size:12px;">Departments</div>
