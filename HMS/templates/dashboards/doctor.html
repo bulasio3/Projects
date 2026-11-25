@@ -2,45 +2,130 @@
 {% block title %}Doctor Dashboard — MediCare{% endblock %}
 
 {% block content %}
+<section class="dashboard-intro doctor-dashboard-intro">
+  <div>
+    <span class="eyebrow">CLINICAL WORKSPACE</span>
+    <h2>Good day, Dr. {{ user.get_full_name|default:user.username }}</h2>
+    <p>Your clinical overview for {{ today|date:system_date_format }}. Review your schedule, patient care and pending results.</p>
+  </div>
+  <div class="intro-mark"><i data-lucide="stethoscope"></i></div>
+</section>
 
-<div class="stats">
-  {% include 'partials/stat_card.html' with label="My Patients Today" value=my_appointments|length sub="Scheduled" tone="" icon="users" %}
-  {% include 'partials/stat_card.html' with label="Completed" value=completed_count sub="Today" tone="success" icon="check-circle" %}
-  {% include 'partials/stat_card.html' with label="Pending Labs" value=pending_labs|length sub="Review needed" tone="warn" icon="flask-conical" %}
-  {% include 'partials/stat_card.html' with label="On Duty" value="Available" sub="Status" tone="success" icon="stethoscope" %}
+{% if not doctor_profile %}
+<section class="panel doctor-profile-notice">
+  <span class="doctor-notice-icon"><i data-lucide="user-round-cog"></i></span>
+  <div>
+    <strong>Your doctor profile is not yet configured</strong>
+    <p>Please ask an administrator to complete your professional profile so your appointments and clinical activity can appear here.</p>
+    <a href="{% url 'doctor_list' %}">View doctor directory <i data-lucide="arrow-up-right"></i></a>
+  </div>
+</section>
+{% else %}
+
+<div class="stats doctor-dashboard-stats">
+  {% include 'partials/stat_card.html' with label="Today's Appointments" value=today_appointment_count sub="Scheduled for today" tone="success" icon="calendar-check" %}
+  {% include 'partials/stat_card.html' with label="My Patients" value=patient_count sub="Patients assigned through appointments" tone="" icon="users" %}
+  {% include 'partials/stat_card.html' with label="Completed Today" value=completed_count sub="Consultations completed" tone="purple" icon="check-circle-2" %}
+  {% include 'partials/stat_card.html' with label="Pending Lab Reviews" value=pending_lab_count sub="Results requiring attention" tone="warn" icon="flask-conical" %}
 </div>
 
-<div class="grid-2">
-  <div class="panel">
-    <div class="panel-head"><h2><i data-lucide="calendar" class="head-icon"></i> My Schedule Today</h2></div>
-    <table>
-      <thead><tr><th>Time</th><th>Patient</th><th>Reason</th><th>Status</th></tr></thead>
-      <tbody>
-        {% for a in my_appointments %}
-        <tr>
-          <td>{{ a.time|time:system_time_format }}</td>
-          <td>{{ a.patient.full_name }}</td>
-          <td>{{ a.reason|default:"—" }}</td>
-          <td>{% include 'partials/pill.html' with text=a.get_status_display tone="blue" %}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" style="text-align:center;color:#6b7a8f;padding:24px;">No appointments today.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <div class="panel">
-    <div class="panel-head"><h2><i data-lucide="flask-conical" class="head-icon"></i> Pending Lab Results</h2></div>
-    {% for lab in pending_labs %}
-      <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
-        <strong>{{ lab.patient.full_name }}</strong>
-        <span style="display:block;font-size:12px;color:#6b7a8f;">{{ lab.test_name }} · {{ lab.created_at|timesince }} ago</span>
+<div class="doctor-dashboard-layout">
+  <section class="panel doctor-schedule-panel">
+    <div class="panel-head">
+      <div>
+        <span class="panel-kicker">YOUR CLINIC</span>
+        <h2><i data-lucide="calendar-days" class="head-icon"></i> Today's schedule</h2>
       </div>
+      <span class="panel-count">{{ pending_count }} active</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Time</th><th>Patient</th><th>Reason for visit</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          {% for a in my_appointments %}
+          <tr>
+            <td class="doctor-time-cell">{{ a.time|time:system_time_format }}</td>
+            <td class="patient-cell">{{ a.patient.full_name }}</td>
+            <td>{{ a.reason|default:"General consultation" }}</td>
+            <td>
+              {% if a.status == 'completed' %}{% include 'partials/pill.html' with text="Completed" tone="green" %}
+              {% elif a.status == 'cancelled' %}{% include 'partials/pill.html' with text="Cancelled" tone="red" %}
+              {% elif a.status == 'pending' %}{% include 'partials/pill.html' with text="Pending" tone="orange" %}
+              {% else %}{% include 'partials/pill.html' with text=a.get_status_display tone="blue" %}
+              {% endif %}
+            </td>
+            <td><a class="doctor-row-link" href="{% url 'patient_detail' a.patient.pk %}" aria-label="View {{ a.patient.full_name }}">View <i data-lucide="arrow-up-right"></i></a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5">
+            <div class="doctor-empty-state"><span><i data-lucide="calendar-check"></i></span><strong>No appointments scheduled today</strong><p>Your schedule will appear here when appointments are assigned to you.</p></div>
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="doctor-dashboard-side">
+    <section class="panel doctor-side-panel">
+      <div class="panel-head">
+        <div><span class="panel-kicker">COMING UP</span><h2><i data-lucide="calendar-clock" class="head-icon"></i> Upcoming visits</h2></div>
+      </div>
+      <div class="doctor-upcoming-list">
+        {% for a in upcoming_appointments %}
+        <a class="doctor-upcoming-item" href="{% url 'patient_detail' a.patient.pk %}">
+          <span class="doctor-date-tile"><strong>{{ a.date|date:"d" }}</strong><small>{{ a.date|date:"M" }}</small></span>
+          <span class="doctor-upcoming-info"><strong>{{ a.patient.full_name }}</strong><small>{{ a.time|time:system_time_format }} · {{ a.reason|default:"Consultation" }}</small></span>
+          <i data-lucide="chevron-right"></i>
+        </a>
+        {% empty %}
+        <div class="doctor-compact-empty">No upcoming visits scheduled.</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="panel doctor-side-panel">
+      <div class="panel-head">
+        <div><span class="panel-kicker">REQUIRES REVIEW</span><h2><i data-lucide="flask-conical" class="head-icon"></i> Pending lab results</h2></div>
+        {% if pending_lab_count %}<span class="panel-count">{{ pending_lab_count }}</span>{% endif %}
+      </div>
+      <div class="doctor-lab-list">
+        {% for lab in pending_labs %}
+        <a class="doctor-lab-item" href="{% url 'patient_detail' lab.patient.pk %}">
+          <span class="doctor-lab-icon"><i data-lucide="test-tube"></i></span>
+          <span><strong>{{ lab.test_name }}</strong><small>{{ lab.patient.full_name }} · {{ lab.created_at|timesince }} ago</small></span>
+          <i data-lucide="arrow-up-right"></i>
+        </a>
+        {% empty %}
+        <div class="doctor-compact-empty doctor-clear-state"><i data-lucide="check-circle-2"></i><span>No lab reviews pending.</span></div>
+        {% endfor %}
+      </div>
+    </section>
+  </aside>
+</div>
+
+<section class="panel doctor-records-panel">
+  <div class="panel-head">
+    <div><span class="panel-kicker">CLINICAL ACTIVITY</span><h2><i data-lucide="clipboard-list" class="head-icon"></i> Recent medical records</h2></div>
+    <span class="panel-count">Latest 5</span>
+  </div>
+  <div class="doctor-record-grid">
+    {% for record in recent_records %}
+    <a class="doctor-record-item" href="{% url 'patient_detail' record.patient.pk %}">
+      <span class="doctor-record-icon"><i data-lucide="file-medical"></i></span>
+      <span class="doctor-record-copy"><strong>{{ record.patient.full_name }}</strong><small>{{ record.created_at|date:system_date_format }} · {{ record.diagnosis|default:"Clinical record" |truncatechars:72 }}</small></span>
+      <i data-lucide="arrow-up-right"></i>
+    </a>
     {% empty %}
-      <p style="color:#6b7a8f;font-size:13px;">No pending results.</p>
+    <div class="doctor-record-empty"><i data-lucide="files"></i><strong>No medical records yet</strong><span>Records you create for your patients will be listed here.</span></div>
     {% endfor %}
   </div>
-</div>
+</section>
 
+<div class="doctor-quick-actions">
+  <div><span class="panel-kicker">QUICK ACCESS</span><strong>Clinical tools</strong></div>
+  <a href="{% url 'appointment_list' %}"><i data-lucide="calendar-check"></i> Appointments</a>
+  <a href="{% url 'doctor_list' %}"><i data-lucide="users"></i> Doctor directory</a>
+</div>
+{% endif %}
 {% endblock %}
