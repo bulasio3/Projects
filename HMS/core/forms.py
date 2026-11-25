@@ -103,6 +103,30 @@ class NotificationSettingsForm(forms.ModelForm):
         }
 
 
+class InvoiceForm(forms.ModelForm):
+    class Meta:
+        from .models import Invoice
+        model = Invoice
+        fields = ['patient', 'appointment', 'total']
+        widgets = {
+            'total': forms.NumberInput(attrs={'min': '0.01', 'step': '0.01', 'placeholder': 'Enter invoice total'}),
+        }
+
+    def clean_total(self):
+        total = self.cleaned_data.get('total')
+        if total is not None and total <= 0:
+            raise forms.ValidationError('Invoice total must be greater than zero.')
+        return total
+
+    def clean(self):
+        cleaned = super().clean()
+        patient = cleaned.get('patient')
+        appointment = cleaned.get('appointment')
+        if patient and appointment and appointment.patient_id != patient.pk:
+            self.add_error('appointment', 'Choose an appointment belonging to the selected patient.')
+        return cleaned
+
+
 class SystemPreferencesForm(forms.ModelForm):
     class Meta:
         model = SystemPreferences
