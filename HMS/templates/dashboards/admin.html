@@ -2,63 +2,89 @@
 {% block title %}Admin Dashboard — MediCare{% endblock %}
 
 {% block content %}
+<section class="dashboard-intro">
+  <div>
+    <span class="eyebrow">ADMINISTRATION</span>
+    <h2>Hospital overview</h2>
+    <p>Monitor activity, review appointments and keep hospital operations on track.</p>
+  </div>
+  <div class="intro-mark"><i data-lucide="activity"></i></div>
+</section>
+
 <div class="stats">
-  {% include 'partials/stat_card.html' with label="Total Patients" value=total_patients sub="All registered" tone="" icon="users" %}
-  {% include 'partials/stat_card.html' with label="Appointments Today" value=appointments_today sub="Scheduled" tone="success" icon="calendar" %}
+  {% include 'partials/stat_card.html' with label="Total Patients" value=total_patients sub="All registered patients" tone="" icon="users" %}
+  {% include 'partials/stat_card.html' with label="Appointments Today" value=appointments_today sub="Scheduled for today" tone="success" icon="calendar-check" %}
   {% include 'partials/stat_card.html' with label="Pending Invoices" value=pending_invoices sub="Awaiting payment" tone="warn" icon="receipt" %}
-  {% include 'partials/stat_card.html' with label="Staff Accounts" value=total_staff sub="Non-patient users" tone="" icon="user-cog" %}
+  {% include 'partials/stat_card.html' with label="Staff Accounts" value=total_staff sub="Registered staff members" tone="purple" icon="user-cog" %}
 </div>
 
-<div class="grid-2">
-  <div class="panel">
-    <div class="panel-head"><h2><i data-lucide="clock" class="head-icon"></i> Recent Appointments</h2></div>
-    <table>
-      <thead><tr><th>Patient</th><th>Doctor</th><th>Date / Time</th><th>Status</th></tr></thead>
-      <tbody>
-        {% for a in recent_appointments %}
-        <tr>
-          <td>{{ a.patient.full_name }}</td>
-          <td>Dr. {{ a.doctor.user.get_full_name }}</td>
-          <td>{{ a.date|date:"M d" }} · {{ a.time|time:"H:i" }}</td>
-          <td>
-            {% if a.status == 'completed' %}{% include 'partials/pill.html' with text="Completed" tone="green" %}
-            {% elif a.status == 'confirmed' %}{% include 'partials/pill.html' with text="Confirmed" tone="blue" %}
-            {% elif a.status == 'pending' %}{% include 'partials/pill.html' with text="Pending" tone="orange" %}
-            {% elif a.status == 'cancelled' %}{% include 'partials/pill.html' with text="Cancelled" tone="red" %}
-            {% else %}{% include 'partials/pill.html' with text=a.get_status_display tone="gray" %}
-            {% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" style="text-align:center;color:#6b7a8f;padding:24px;">No appointments yet.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<div class="admin-dashboard-grid">
+  <section class="panel appointments-panel">
+    <div class="panel-head">
+      <div>
+        <span class="panel-kicker">SCHEDULE</span>
+        <h2><i data-lucide="calendar-clock" class="head-icon"></i> Recent appointments</h2>
+      </div>
+      <span class="panel-count">{{ recent_appointments|length }} recent</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Patient</th><th>Doctor</th><th>Date / Time</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for a in recent_appointments %}
+          <tr>
+            <td class="patient-cell">{{ a.patient.full_name }}</td>
+            <td>Dr. {{ a.doctor.user.get_full_name }}</td>
+            <td>{{ a.date|date:"M d" }} <span class="time-separator">·</span> {{ a.time|time:"H:i" }}</td>
+            <td>
+              {% if a.status == 'completed' %}{% include 'partials/pill.html' with text="Completed" tone="green" %}
+              {% elif a.status == 'confirmed' %}{% include 'partials/pill.html' with text="Confirmed" tone="blue" %}
+              {% elif a.status == 'pending' %}{% include 'partials/pill.html' with text="Pending" tone="orange" %}
+              {% elif a.status == 'cancelled' %}{% include 'partials/pill.html' with text="Cancelled" tone="red" %}
+              {% else %}{% include 'partials/pill.html' with text=a.get_status_display tone="gray" %}
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="empty-state"><i data-lucide="calendar-x"></i><strong>No appointments yet</strong><span>New appointments will appear here.</span></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-  <div class="panel">
-    <div class="panel-head"><h2><i data-lucide="alert-triangle" class="head-icon"></i> Operational Alerts</h2></div>
+  <section class="panel alerts-panel">
+    <div class="panel-head">
+      <div>
+        <span class="panel-kicker">ATTENTION REQUIRED</span>
+        <h2><i data-lucide="bell-ring" class="head-icon"></i> Operational alerts</h2>
+      </div>
+    </div>
     {% if low_stock_medicines %}
-      <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
-        <strong>Low-stock medicines: {{ low_stock_medicines }}</strong>
-        <span style="display:block;font-size:12px;color:#6b7a8f;">Review inventory and arrange replenishment.</span>
+      <div class="admin-alert alert-stock">
+        <span class="alert-icon"><i data-lucide="package-alert"></i></span>
+        <div><strong>Low-stock medicines</strong><span>{{ low_stock_medicines }} item(s) need inventory review.</span></div>
       </div>
     {% endif %}
     {% if pending_callbacks %}
-      <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
-        <strong>Pending callbacks: {{ pending_callbacks }}</strong>
-        <span style="display:block;font-size:12px;color:#6b7a8f;">Reception follow-up is required.</span>
+      <div class="admin-alert alert-callback">
+        <span class="alert-icon"><i data-lucide="phone-call"></i></span>
+        <div><strong>Pending callbacks</strong><span>{{ pending_callbacks }} follow-up(s) require attention.</span></div>
       </div>
     {% endif %}
     {% if pending_lab_tests %}
-      <div style="padding:12px 0;border-bottom:1px solid #f0f3f7;">
-        <strong>Outstanding lab tests: {{ pending_lab_tests }}</strong>
-        <span style="display:block;font-size:12px;color:#6b7a8f;">Tests are awaiting completion.</span>
+      <div class="admin-alert alert-lab">
+        <span class="alert-icon"><i data-lucide="flask-conical"></i></span>
+        <div><strong>Outstanding lab tests</strong><span>{{ pending_lab_tests }} test(s) are awaiting completion.</span></div>
       </div>
     {% endif %}
     {% if not low_stock_medicines and not pending_callbacks and not pending_lab_tests %}
-      <p style="color:#6b7a8f;padding:12px 0;">No outstanding operational alerts.</p>
+      <div class="all-clear">
+        <span><i data-lucide="check-circle-2"></i></span>
+        <strong>All clear</strong>
+        <p>There are no outstanding operational alerts.</p>
+      </div>
     {% endif %}
-  </div>
+  </section>
 </div>
 {% endblock %}
