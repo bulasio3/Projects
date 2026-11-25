@@ -1,5 +1,34 @@
 {% extends 'base.html' %}
 {% block title %}Hospital Settings — MediCare{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+ const form=document.getElementById('appointment-config-form'); if(!form) return;
+ const duration=form.querySelector('[name="appointment_duration"]');
+ const capacity=form.querySelector('[name="max_appointments_per_doctor"]');
+ const opening=form.querySelector('[name="opening_time"]'); const closing=form.querySelector('[name="closing_time"]');
+ const online=form.querySelector('[name="online_booking_enabled"]');
+ const days=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+ const labels=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+ const dayInputs=days.map(d=>form.querySelector('[name="'+d+'"]'));
+ const dayNames=()=>dayInputs.map((el,i)=>el&&el.checked?labels[i]:null).filter(Boolean);
+ const fmt=t=>{if(!t)return '—';const [h,m]=t.split(':').map(Number);const suffix=h>=12?'PM':'AM';return ((h%12)||12)+':'+String(m).padStart(2,'0')+' '+suffix;};
+ function refresh(){
+  document.getElementById('schedule-preview-hours').textContent=fmt(opening.value)+' – '+fmt(closing.value);
+  const selected=dayNames(); document.getElementById('schedule-preview-days').textContent=selected.length?selected.join(' · '):'No working days selected';
+  document.getElementById('schedule-preview-duration').textContent=(duration.value||30)+' min';
+  document.getElementById('capacity-preview-value').textContent=capacity.value||0;
+  document.getElementById('online-status').textContent=online.checked?'Enabled':'Disabled';
+  document.getElementById('online-description').textContent=online.checked?'Online requests are switched on.':'Online requests are currently switched off.';
+  dayInputs.forEach((el,i)=>{if(el){const label=el.closest('.day-choice');if(label)label.classList.toggle('selected',el.checked);}});
+  form.querySelectorAll('[data-duration]').forEach(btn=>btn.classList.toggle('active',String(duration.value)===btn.dataset.duration));
+ }
+ form.querySelectorAll('[data-duration]').forEach(btn=>btn.addEventListener('click',()=>{duration.value=btn.dataset.duration;refresh();}));
+ form.addEventListener('input',refresh); form.addEventListener('change',refresh); refresh();
+})();
+</script>
+{% endblock %}
 {% block content %}
 <div class="panel" style="margin-bottom:20px;">
   <div class="panel-head">
@@ -46,6 +75,89 @@
       <button type="submit" class="btn-sm btn-primary" style="padding:11px 18px;margin-top:16px;">Save hospital profile</button>
     </form>
   </div>
+  <section class="appointment-config-section" id="appointment-config-section">
+    <div class="appointment-config-heading">
+      <div>
+        <span class="panel-kicker">SCHEDULING & ACCESS</span>
+        <h3>Appointment configuration</h3>
+        <p>Set the hospital's standard consultation schedule and booking capacity.</p>
+      </div>
+      <span class="config-live-pill"><span></span> Live settings preview</span>
+    </div>
+
+    <form method="post" id="appointment-config-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_appointment_config">
+      <div class="appointment-config-grid">
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="clock-3"></i></span><div><strong>Appointment duration</strong><small>Standard time reserved for each consultation</small></div></div>
+          <label class="config-field">Duration per appointment
+            {{ appointment_form.appointment_duration }}
+          </label>
+          <div class="duration-options" role="group" aria-label="Quick appointment duration">
+            <button type="button" data-duration="15">15 min</button>
+            <button type="button" data-duration="30">30 min</button>
+            <button type="button" data-duration="45">45 min</button>
+            <button type="button" data-duration="60">60 min</button>
+          </div>
+        </div>
+
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="calendar-days"></i></span><div><strong>Working days</strong><small>Choose the days when appointments can be scheduled</small></div></div>
+          <div class="working-day-picker">
+            {% for field in appointment_form %}
+              {% if field.name == 'monday' or field.name == 'tuesday' or field.name == 'wednesday' or field.name == 'thursday' or field.name == 'friday' or field.name == 'saturday' or field.name == 'sunday' %}
+              <label class="day-choice {% if field.value %}selected{% endif %}">
+                {{ field }}<span>{{ field.label|slice:":3" }}</span>
+              </label>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <small class="config-hint">Select at least one working day.</small>
+          {% if appointment_form.non_field_errors %}<div class="config-error">{{ appointment_form.non_field_errors }}</div>{% endif %}
+        </div>
+
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="sunrise"></i></span><div><strong>Clinic hours</strong><small>Daily appointment operating window</small></div></div>
+          <div class="time-fields">
+            <label class="config-field">Opening time {{ appointment_form.opening_time }}</label>
+            <label class="config-field">Closing time {{ appointment_form.closing_time }}</label>
+          </div>
+          {% for error in appointment_form.opening_time.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+          {% for error in appointment_form.closing_time.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+        </div>
+
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="users-round"></i></span><div><strong>Daily booking capacity</strong><small>Maximum appointments per doctor each day</small></div></div>
+          <label class="config-field">Appointments per doctor
+            {{ appointment_form.max_appointments_per_doctor }}
+          </label>
+          <div class="capacity-preview"><span>Daily capacity limit</span><strong><b id="capacity-preview-value">{{ appointment_config.max_appointments_per_doctor }}</b> appointments / doctor</strong></div>
+        </div>
+
+        <div class="config-card config-online-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="globe-2"></i></span><div><strong>Online appointment requests</strong><small>Allow patients to request appointments online</small></div></div>
+          <label class="online-toggle">
+            <span><strong id="online-status">{{ appointment_config.online_booking_enabled|yesno:"Enabled,Disabled" }}</strong><small id="online-description">{% if appointment_config.online_booking_enabled %}Online requests are switched on.{% else %}Online requests are currently switched off.{% endif %}</small></span>
+            <span class="switch-control">{{ appointment_form.online_booking_enabled }}<span class="switch-track"></span></span>
+          </label>
+          <div class="config-hint">This controls the booking preference. A patient-facing online booking flow must be enabled separately.</div>
+        </div>
+      </div>
+
+      <div class="schedule-preview">
+        <div class="schedule-preview-icon"><i data-lucide="calendar-check-2"></i></div>
+        <div class="schedule-preview-copy"><span>YOUR SCHEDULE PREVIEW</span><strong id="schedule-preview-hours">08:00 – 17:00</strong><small id="schedule-preview-days">Monday – Friday</small></div>
+        <div class="schedule-preview-duration"><strong id="schedule-preview-duration">30 min</strong><small>per appointment</small></div>
+      </div>
+      <div class="config-actions">
+        <span><i data-lucide="shield-check"></i> Only administrators can change these settings.</span>
+        <button type="submit" class="btn-sm btn-primary"><i data-lucide="save"></i> Save appointment settings</button>
+      </div>
+      {% if appointment_form.non_field_errors %}<div class="config-error">{{ appointment_form.non_field_errors }}</div>{% endif %}
+    </form>
+  </section>
+
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:22px;">
     <div style="padding:16px;border:1px solid #e5eaf0;border-radius:10px;">
       <div style="color:#6b7a8f;font-size:12px;">Departments</div>
