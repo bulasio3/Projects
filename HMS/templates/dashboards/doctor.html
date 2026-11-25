@@ -1,131 +1,198 @@
 {% extends 'base.html' %}
-{% block title %}Doctor Dashboard — MediCare{% endblock %}
+{% block title %}Doctor Clinical Workspace — MediCare{% endblock %}
 
 {% block content %}
-<section class="dashboard-intro doctor-dashboard-intro">
-  <div>
-    <span class="eyebrow">CLINICAL WORKSPACE</span>
-    <h2>Good day, Dr. {{ user.get_full_name|default:user.username }}</h2>
-    <p>Your clinical overview for {{ today|date:system_date_format }}. Review your schedule, patient care and pending results.</p>
-  </div>
-  <div class="intro-mark"><i data-lucide="stethoscope"></i></div>
-</section>
-
-{% if not doctor_profile %}
-<section class="panel doctor-profile-notice">
-  <span class="doctor-notice-icon"><i data-lucide="user-round-cog"></i></span>
-  <div>
-    <strong>Your doctor profile is not yet configured</strong>
-    <p>Please ask an administrator to complete your professional profile so your appointments and clinical activity can appear here.</p>
-    <a href="{% url 'doctor_list' %}">View doctor directory <i data-lucide="arrow-up-right"></i></a>
-  </div>
-</section>
-{% else %}
-
-<div class="stats doctor-dashboard-stats">
-  {% include 'partials/stat_card.html' with label="Today's Appointments" value=today_appointment_count sub="Scheduled for today" tone="success" icon="calendar-check" %}
-  {% include 'partials/stat_card.html' with label="My Patients" value=patient_count sub="Patients assigned through appointments" tone="" icon="users" %}
-  {% include 'partials/stat_card.html' with label="Completed Today" value=completed_count sub="Consultations completed" tone="purple" icon="check-circle-2" %}
-  {% include 'partials/stat_card.html' with label="Pending Lab Reviews" value=pending_lab_count sub="Results requiring attention" tone="warn" icon="flask-conical" %}
-</div>
-
-<div class="doctor-dashboard-layout">
-  <section class="panel doctor-schedule-panel">
-    <div class="panel-head">
-      <div>
-        <span class="panel-kicker">YOUR CLINIC</span>
-        <h2><i data-lucide="calendar-days" class="head-icon"></i> Today's schedule</h2>
-      </div>
-      <span class="panel-count">{{ pending_count }} active</span>
+<section class="doctor-workspace">
+  <header class="doctor-workspace-header">
+    <div class="doctor-heading">
+      <span class="eyebrow">CLINICAL WORKSPACE</span>
+      <h2>Good day, Dr. {{ user.get_full_name|default:user.username }}</h2>
+      <p>{{ doctor_profile.specialization|default:"Medical practitioner" }}{% if doctor_profile.department %} · {{ doctor_profile.department.name }}{% endif %} · {{ today|date:system_date_format }}</p>
     </div>
-    <div class="table-scroll">
-      <table>
-        <thead><tr><th>Time</th><th>Patient</th><th>Reason for visit</th><th>Status</th><th></th></tr></thead>
-        <tbody>
-          {% for a in my_appointments %}
-          <tr>
-            <td class="doctor-time-cell">{{ a.time|time:system_time_format }}</td>
-            <td class="patient-cell">{{ a.patient.full_name }}</td>
-            <td>{{ a.reason|default:"General consultation" }}</td>
-            <td>
-              {% if a.status == 'completed' %}{% include 'partials/pill.html' with text="Completed" tone="green" %}
-              {% elif a.status == 'cancelled' %}{% include 'partials/pill.html' with text="Cancelled" tone="red" %}
-              {% elif a.status == 'pending' %}{% include 'partials/pill.html' with text="Pending" tone="orange" %}
-              {% else %}{% include 'partials/pill.html' with text=a.get_status_display tone="blue" %}
-              {% endif %}
-            </td>
-            <td><a class="doctor-row-link" href="{% url 'patient_detail' a.patient.pk %}" aria-label="View {{ a.patient.full_name }}">View <i data-lucide="arrow-up-right"></i></a></td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="5">
-            <div class="doctor-empty-state"><span><i data-lucide="calendar-check"></i></span><strong>No appointments scheduled today</strong><p>Your schedule will appear here when appointments are assigned to you.</p></div>
-          </td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="doctor-header-actions">
+      <form method="get" action="{% url 'dashboard' %}" class="doctor-global-search">
+        <i data-lucide="search"></i>
+        <input type="search" name="q" value="{{ patient_search }}" placeholder="Search my patients by name, MRN or phone" aria-label="Search assigned patients">
+        <button type="submit">Search</button>
+      </form>
+      <a class="doctor-create-action" href="{% url 'appointment_list' %}"><i data-lucide="calendar-plus"></i> Appointments</a>
+      <span class="doctor-profile-chip"><span class="doctor-status-dot"></span> {{ doctor_profile.department.name|default:"My clinic" }}</span>
     </div>
+  </header>
+
+  {% if not doctor_profile %}
+  <section class="panel doctor-profile-notice">
+    <span class="doctor-notice-icon"><i data-lucide="user-round-cog"></i></span>
+    <div><strong>Your doctor profile is not yet configured</strong><p>Please ask an administrator to complete your professional profile before using the clinical workspace.</p><a href="{% url 'doctor_list' %}">View doctor directory <i data-lucide="arrow-up-right"></i></a></div>
+  </section>
+  {% else %}
+
+  {% if patient_search %}
+  <section class="panel doctor-search-results">
+    <div class="panel-head"><div><span class="panel-kicker">PATIENT SEARCH</span><h2>Matching patients</h2></div><a class="doctor-clear-search" href="{% url 'dashboard' %}">Clear search</a></div>
+    {% for patient in patient_search_results %}
+      <a class="doctor-search-result" href="{% url 'patient_detail' patient.pk %}">
+        <span class="doctor-search-avatar">{{ patient.initials }}</span>
+        <span class="doctor-search-person"><strong>{{ patient.full_name }}</strong><small>{{ patient.code }} · {{ patient.phone }}</small></span>
+        <span class="doctor-search-meta">{{ patient.age }}{% if patient.gender %} · {{ patient.get_gender_display }}{% endif %}</span>
+        <span class="doctor-row-link">Open chart <i data-lucide="arrow-up-right"></i></span>
+      </a>
+    {% empty %}
+      <div class="doctor-compact-empty">No assigned patients match that search.</div>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <section class="doctor-kpi-strip" aria-label="Clinical summary">
+    <a class="doctor-kpi-card" href="#outpatient-workspace">
+      <span class="doctor-kpi-icon"><i data-lucide="calendar-check"></i></span>
+      <span class="doctor-kpi-label">Today's appointments</span>
+      <strong>{{ completed_count }} <small>/ {{ today_appointment_count }}</small></strong>
+      <span class="doctor-kpi-foot">Completed / scheduled today</span>
+    </a>
+    <a class="doctor-kpi-card" href="#diagnostic-updates">
+      <span class="doctor-kpi-icon"><i data-lucide="flask-conical"></i></span>
+      <span class="doctor-kpi-label">Results available</span>
+      <strong>{{ ready_lab_count }}</strong>
+      <span class="doctor-kpi-foot">Laboratory results marked ready</span>
+    </a>
+    <a class="doctor-kpi-card" href="#clinical-records">
+      <span class="doctor-kpi-icon"><i data-lucide="file-medical"></i></span>
+      <span class="doctor-kpi-label">Clinical records</span>
+      <strong>{{ clinical_record_count }}</strong>
+      <span class="doctor-kpi-foot">Records created by you</span>
+    </a>
+    <a class="doctor-kpi-card" href="#outpatient-workspace">
+      <span class="doctor-kpi-icon"><i data-lucide="users"></i></span>
+      <span class="doctor-kpi-label">My patients</span>
+      <strong>{{ patient_count }}</strong>
+      <span class="doctor-kpi-foot">Patients linked to your appointments</span>
+    </a>
   </section>
 
-  <aside class="doctor-dashboard-side">
-    <section class="panel doctor-side-panel">
-      <div class="panel-head">
-        <div><span class="panel-kicker">COMING UP</span><h2><i data-lucide="calendar-clock" class="head-icon"></i> Upcoming visits</h2></div>
-      </div>
-      <div class="doctor-upcoming-list">
-        {% for a in upcoming_appointments %}
-        <a class="doctor-upcoming-item" href="{% url 'patient_detail' a.patient.pk %}">
-          <span class="doctor-date-tile"><strong>{{ a.date|date:"d" }}</strong><small>{{ a.date|date:"M" }}</small></span>
-          <span class="doctor-upcoming-info"><strong>{{ a.patient.full_name }}</strong><small>{{ a.time|time:system_time_format }} · {{ a.reason|default:"Consultation" }}</small></span>
-          <i data-lucide="chevron-right"></i>
-        </a>
-        {% empty %}
-        <div class="doctor-compact-empty">No upcoming visits scheduled.</div>
-        {% endfor %}
-      </div>
-    </section>
+  <div class="doctor-clinical-layout">
+    <main class="doctor-main-column">
+      <section class="panel doctor-workspace-panel" id="outpatient-workspace">
+        <div class="panel-head doctor-workspace-panel-head">
+          <div><span class="panel-kicker">PATIENT WORKSPACE</span><h2>Clinical schedule</h2></div>
+          <a class="doctor-panel-link" href="{% url 'appointment_list' %}">All appointments <i data-lucide="arrow-up-right"></i></a>
+        </div>
+        <div class="doctor-workspace-tabs" role="tablist" aria-label="Clinical patient lists">
+          <button type="button" class="doctor-workspace-tab active" id="doctor-outpatient-tab" role="tab" aria-selected="true" aria-controls="doctor-outpatient-panel" data-doctor-tab="outpatient">Today's outpatient schedule <span>{{ today_appointment_count }}</span></button>
+          <button type="button" class="doctor-workspace-tab" id="doctor-inpatient-tab" role="tab" aria-selected="false" aria-controls="doctor-inpatient-panel" data-doctor-tab="inpatient">Inpatient ward watchlist</button>
+        </div>
+        <div id="doctor-outpatient-panel" class="doctor-tab-panel" role="tabpanel" aria-labelledby="doctor-outpatient-tab">
+          <div class="doctor-table-wrap">
+            <table class="doctor-clinical-table">
+              <thead><tr><th>Time</th><th>Patient / MRN</th><th>Age / Sex</th><th>Reason for visit</th><th>Allergies</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                {% for a in my_appointments %}
+                <tr>
+                  <td class="doctor-time-cell">{{ a.time|time:system_time_format }}</td>
+                  <td><a class="doctor-patient-identity" href="{% url 'patient_detail' a.patient.pk %}"><strong>{{ a.patient.full_name }}</strong><small>{{ a.patient.code }}</small></a></td>
+                  <td class="doctor-demographics">{{ a.patient.age }}{% if a.patient.gender %} / {{ a.patient.get_gender_display }}{% endif %}</td>
+                  <td class="doctor-complaint">{{ a.reason|default:"General consultation"|truncatechars:55 }}</td>
+                  <td>{% if a.patient.allergies %}<span class="doctor-allergy-flag" title="{{ a.patient.allergies }}"><i data-lucide="alert-triangle"></i> Review</span>{% else %}<span class="doctor-no-allergy">Not recorded</span>{% endif %}</td>
+                  <td>
+                    {% if a.status == 'completed' %}<span class="doctor-status-pill completed">Completed</span>
+                    {% elif a.status == 'cancelled' %}<span class="doctor-status-pill cancelled">Cancelled</span>
+                    {% elif a.status == 'checked_in' %}<span class="doctor-status-pill arrived">Checked in</span>
+                    {% elif a.status == 'in_progress' %}<span class="doctor-status-pill in-progress">In progress</span>
+                    {% elif a.status == 'no_show' %}<span class="doctor-status-pill cancelled">No-show</span>
+                    {% else %}<span class="doctor-status-pill scheduled">{{ a.get_status_display }}</span>{% endif %}
+                  </td>
+                  <td><a class="doctor-open-chart" href="{% url 'patient_detail' a.patient.pk %}">Open chart <i data-lucide="arrow-up-right"></i></a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7"><div class="doctor-empty-state"><span><i data-lucide="calendar-check"></i></span><strong>No appointments scheduled for today</strong><p>Your assigned appointments will appear here.</p></div></td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="doctor-inpatient-panel" class="doctor-tab-panel" role="tabpanel" aria-labelledby="doctor-inpatient-tab" hidden>
+          <div class="doctor-inpatient-unavailable"><span><i data-lucide="bed-double"></i></span><strong>Inpatient ward tracking is not configured yet</strong><p>This HMS version does not yet have admission, ward-bed allocation or inpatient vital-sign records. We will add this workflow before showing an inpatient watchlist.</p></div>
+        </div>
+      </section>
 
-    <section class="panel doctor-side-panel">
-      <div class="panel-head">
-        <div><span class="panel-kicker">REQUIRES REVIEW</span><h2><i data-lucide="flask-conical" class="head-icon"></i> Pending lab results</h2></div>
-        {% if pending_lab_count %}<span class="panel-count">{{ pending_lab_count }}</span>{% endif %}
-      </div>
-      <div class="doctor-lab-list">
-        {% for lab in pending_labs %}
-        <a class="doctor-lab-item" href="{% url 'patient_detail' lab.patient.pk %}">
-          <span class="doctor-lab-icon"><i data-lucide="test-tube"></i></span>
-          <span><strong>{{ lab.test_name }}</strong><small>{{ lab.patient.full_name }} · {{ lab.created_at|timesince }} ago</small></span>
-          <i data-lucide="arrow-up-right"></i>
-        </a>
-        {% empty %}
-        <div class="doctor-compact-empty doctor-clear-state"><i data-lucide="check-circle-2"></i><span>No lab reviews pending.</span></div>
-        {% endfor %}
-      </div>
-    </section>
-  </aside>
-</div>
+      <section class="panel doctor-records-panel" id="clinical-records">
+        <div class="panel-head"><div><span class="panel-kicker">YOUR CLINICAL ACTIVITY</span><h2>Recent medical records</h2></div><span class="panel-count">Latest 5</span></div>
+        <div class="doctor-record-grid">
+          {% for record in recent_records %}
+          <a class="doctor-record-item" href="{% url 'patient_detail' record.patient.pk %}">
+            <span class="doctor-record-icon"><i data-lucide="file-medical"></i></span>
+            <span class="doctor-record-copy"><strong>{{ record.patient.full_name }}</strong><small>{{ record.patient.code }} · {{ record.created_at|date:system_date_format }} · {{ record.diagnosis|default:"Clinical record"|truncatechars:65 }}</small></span>
+            <i data-lucide="arrow-up-right"></i>
+          </a>
+          {% empty %}<div class="doctor-record-empty"><i data-lucide="files"></i><strong>No medical records yet</strong><span>Records you create for your patients will appear here.</span></div>{% endfor %}
+        </div>
+      </section>
+    </main>
 
-<section class="panel doctor-records-panel">
-  <div class="panel-head">
-    <div><span class="panel-kicker">CLINICAL ACTIVITY</span><h2><i data-lucide="clipboard-list" class="head-icon"></i> Recent medical records</h2></div>
-    <span class="panel-count">Latest 5</span>
+    <aside class="doctor-right-column">
+      <section class="panel doctor-side-panel" id="diagnostic-updates">
+        <div class="panel-head"><div><span class="panel-kicker">DIAGNOSTICS</span><h2>Laboratory updates</h2></div><span class="panel-count">{{ ready_lab_count }} ready</span></div>
+        <div class="doctor-lab-list">
+          {% for lab in ready_labs %}
+          <a class="doctor-lab-item" href="{% url 'patient_detail' lab.patient.pk %}">
+            <span class="doctor-lab-icon ready"><i data-lucide="file-check-2"></i></span>
+            <span><strong>{{ lab.test_name }}</strong><small>{{ lab.patient.full_name }} · {{ lab.completed_at|date:system_date_format|default:lab.created_at|date:system_date_format }}</small><small class="doctor-result-preview">{{ lab.result|default:"Result marked ready"|truncatechars:75 }}</small></span>
+            <i data-lucide="arrow-up-right"></i>
+          </a>
+          {% empty %}<div class="doctor-compact-empty doctor-clear-state"><i data-lucide="check-circle-2"></i><span>No completed results available.</span></div>{% endfor %}
+        </div>
+      </section>
+
+      <section class="panel doctor-side-panel">
+        <div class="panel-head"><div><span class="panel-kicker">IN PROGRESS</span><h2>Tests being processed</h2></div><span class="panel-count">{{ pending_lab_count }}</span></div>
+        <div class="doctor-lab-list">
+          {% for lab in pending_labs %}
+          <a class="doctor-lab-item" href="{% url 'patient_detail' lab.patient.pk %}">
+            <span class="doctor-lab-icon"><i data-lucide="test-tube"></i></span>
+            <span><strong>{{ lab.test_name }}</strong><small>{{ lab.patient.full_name }} · {{ lab.get_status_display }}</small></span>
+            <i data-lucide="arrow-up-right"></i>
+          </a>
+          {% empty %}<div class="doctor-compact-empty">No tests currently in progress.</div>{% endfor %}
+        </div>
+      </section>
+
+      <section class="panel doctor-side-panel doctor-inbox-panel">
+        <div class="panel-head"><div><span class="panel-kicker">CARE COORDINATION</span><h2>Care team inbox</h2></div></div>
+        <div class="doctor-inbox-empty"><i data-lucide="messages-square"></i><strong>Team messaging not configured</strong><p>Secure clinical messaging will appear here after the messaging workflow is implemented.</p></div>
+      </section>
+    </aside>
   </div>
-  <div class="doctor-record-grid">
-    {% for record in recent_records %}
-    <a class="doctor-record-item" href="{% url 'patient_detail' record.patient.pk %}">
-      <span class="doctor-record-icon"><i data-lucide="file-medical"></i></span>
-      <span class="doctor-record-copy"><strong>{{ record.patient.full_name }}</strong><small>{{ record.created_at|date:system_date_format }} · {{ record.diagnosis|default:"Clinical record"|truncatechars:72 }}</small></span>
-      <i data-lucide="arrow-up-right"></i>
-    </a>
-    {% empty %}
-    <div class="doctor-record-empty"><i data-lucide="files"></i><strong>No medical records yet</strong><span>Records you create for your patients will be listed here.</span></div>
-    {% endfor %}
-  </div>
+
+  <section class="doctor-quick-actions">
+    <div><span class="panel-kicker">QUICK ACCESS</span><strong>Clinical tools</strong></div>
+    <a href="{% url 'appointment_list' %}"><i data-lucide="calendar-days"></i> Appointments</a>
+    <a href="{% url 'doctor_list' %}"><i data-lucide="stethoscope"></i> Doctor directory</a>
+  </section>
+  {% endif %}
 </section>
+{% endblock %}
 
-<div class="doctor-quick-actions">
-  <div><span class="panel-kicker">QUICK ACCESS</span><strong>Clinical tools</strong></div>
-  <a href="{% url 'appointment_list' %}"><i data-lucide="calendar-check"></i> Appointments</a>
-  <a href="{% url 'doctor_list' %}"><i data-lucide="users"></i> Doctor directory</a>
-</div>
-{% endif %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const tabs = document.querySelectorAll('[data-doctor-tab]');
+  const panels = {
+    outpatient: document.getElementById('doctor-outpatient-panel'),
+    inpatient: document.getElementById('doctor-inpatient-panel')
+  };
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      const selected = tab.dataset.doctorTab;
+      tabs.forEach(function (item) {
+        const active = item === tab;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      Object.keys(panels).forEach(function (key) {
+        if (panels[key]) panels[key].hidden = key !== selected;
+      });
+    });
+  });
+});
+</script>
 {% endblock %}
