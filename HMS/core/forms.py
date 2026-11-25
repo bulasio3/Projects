@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Appointment, HospitalSettings, AppointmentConfiguration
+from .models import Patient, Appointment, HospitalSettings, AppointmentConfiguration, NotificationSettings
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -88,3 +88,16 @@ class AppointmentConfigurationForm(forms.ModelForm):
         if not any(cleaned.get(day) for day in ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')):
             raise forms.ValidationError('Select at least one working day.')
         return cleaned
+
+
+class NotificationSettingsForm(forms.ModelForm):
+    class Meta:
+        model = NotificationSettings
+        fields = [
+            'appointment_reminders', 'payment_alerts', 'lab_result_alerts',
+            'low_stock_alerts', 'email_notifications', 'sms_notifications',
+            'reminder_hours_before',
+        ]
+        widgets = {
+            'reminder_hours_before': forms.Select(),
+        }
