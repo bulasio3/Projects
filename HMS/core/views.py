@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
 from .models import *
-from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm, AppointmentConfigurationForm, NotificationSettingsForm
+from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm, AppointmentConfigurationForm, NotificationSettingsForm, SystemPreferencesForm
 from django.core.exceptions import PermissionDenied
 from functools import wraps
 
@@ -312,7 +312,7 @@ def hospital_settings(request):
 
     if request.method == 'POST':
         action = request.POST.get('action')
-        if action == 'save_system_preferences':\n            preferences_form = SystemPreferencesForm(request.POST, instance=system_preferences)\n            if preferences_form.is_valid():\n                preferences_form.save()\n                messages.success(request, 'System preferences saved successfully.')\n                return redirect('system_preferences')\n            messages.error(request, 'Please review the system preference fields.')\n        if action == 'save_notifications':
+        if action == 'save_notifications':
             notification_form = NotificationSettingsForm(request.POST, instance=notification_settings)
             if notification_form.is_valid():
                 notification_form.save()
