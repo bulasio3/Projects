@@ -315,6 +315,11 @@ def user_edit(request, pk):
 @login_required
 @role_required(['admin', 'doctor'])
 def doctor_list(request):
+    # Backfill missing profiles for existing accounts assigned the Doctor role.
+    # get_or_create is safe to repeat and never overwrites existing doctor details.
+    doctor_users = User.objects.filter(role='doctor')
+    for doctor_user in doctor_users.iterator():
+        Doctor.objects.get_or_create(user=doctor_user)
     doctors = Doctor.objects.select_related('user', 'department').order_by('user__last_name', 'user__first_name')
     return render(request, 'doctors/list.html', {
         'doctors': doctors,
