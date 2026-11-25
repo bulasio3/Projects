@@ -30,6 +30,7 @@ urlpatterns = [
    path('pharmacy/', views.pharmacy_view, name='pharmacy_view'),
     path('laboratory/', views.lab_view, name='lab_view'),
 
+    path('invoices/new/', views.invoice_create, name='invoice_create'),
     path('invoices/', views.billing_view, name='invoice_list'),
     path('invoices/<int:pk>/pay/', views.invoice_pay, name='invoice_pay'),
 ]
