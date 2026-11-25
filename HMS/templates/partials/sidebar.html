@@ -26,8 +26,24 @@
       </a>
     {% endif %}
 
-    <!-- Admin & Doctors -->
-    {% if current_role == 'admin' or current_role == 'doctor' %}
+    <!-- Doctor clinical workspace navigation -->
+    {% if current_role == 'doctor' %}
+      <a href="{% url 'appointment_list' %}" class="{% if active_nav == 'appointments' %}active{% endif %}">
+        <i data-lucide="calendar-days"></i><span>Schedule</span>
+      </a>
+      <a href="{% url 'dashboard' %}#doctor-patient-search">
+        <i data-lucide="users"></i><span>My Patients</span>
+      </a>
+      <a href="{% url 'dashboard' %}#diagnostic-updates">
+        <i data-lucide="flask-conical"></i><span>Lab Results</span>
+      </a>
+      <a href="{% url 'dashboard' %}#doctor-inpatient-tab">
+        <i data-lucide="bed-double"></i><span>Inpatient Wards</span>
+      </a>
+      <a href="{% url 'doctor_list' %}" class="{% if active_nav == 'doctors' %}active{% endif %}">
+        <i data-lucide="stethoscope"></i><span>Doctor Directory</span>
+      </a>
+    {% elif current_role == 'admin' %}
       <a href="{% url 'doctor_list' %}" class="{% if active_nav == 'doctors' %}active{% endif %}">
         <i data-lucide="stethoscope"></i><span>Doctors</span>
       </a>
