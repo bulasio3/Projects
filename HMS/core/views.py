@@ -379,6 +379,43 @@ def hospital_settings(request):
 @role_required(['admin'])
 def security_access(request):
     staff_users = User.objects.exclude(role='patient')
+
+    if request.method == 'POST' and request.POST.get('action') == 'toggle_staff_status':
+        account = get_object_or_404(User, pk=request.POST.get('account_id'))
+        if account.role == 'patient':
+            messages.error(request, 'Patient accounts cannot be managed from staff security.')
+        elif account.pk == request.user.pk and account.is_active:
+            messages.error(request, 'You cannot deactivate your own administrator account.')
+        elif account.role == 'admin' and account.is_active and User.objects.filter(role='admin', is_active=True).count() <= 1:
+            messages.error(request, 'The last active administrator cannot be deactivated.')
+        else:
+            account.is_active = not account.is_active
+            account.save(update_fields=['is_active'])
+            status_label = 'activated' if account.is_active else 'deactivated'
+            messages.success(request, f'{account.username} has been {status_label}.')
+        return redirect('security_access')
+
+    q = request.GET.get('q', '').strip()
+    selected_role = request.GET.get('role', '').strip()
+    selected_status = request.GET.get('status', '').strip()
+    account_users = staff_users.order_by('role', 'username')
+    if q:
+        account_users = account_users.filter(
+            Q(username__icontains=q) | Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) | Q(email__icontains=q)
+        )
+    valid_roles = {value for value, label in User.ROLE_CHOICES if value != 'patient'}
+    if selected_role in valid_roles:
+        account_users = account_users.filter(role=selected_role)
+    else:
+        selected_role = ''
+    if selected_status == 'active':
+        account_users = account_users.filter(is_active=True)
+    elif selected_status == 'inactive':
+        account_users = account_users.filter(is_active=False)
+    else:
+        selected_status = ''
+
     role_summary = []
     for role_value, role_label in User.ROLE_CHOICES:
         if role_value == 'patient':
@@ -397,5 +434,10 @@ def security_access(request):
         'active_admins': User.objects.filter(role='admin', is_active=True).count(),
         'recent_accounts': staff_users.order_by('-date_joined')[:8],
         'role_summary': role_summary,
+        'account_users': account_users,
+        'q': q,
+        'selected_role': selected_role,
+        'selected_status': selected_status,
+        'role_choices': [(value, label) for value, label in User.ROLE_CHOICES if value != 'patient'],
     }
     return render(request, 'settings/security_access.html', context)
