@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}System Preferences — MediCare{% endblock %}
+{% block content %}
+<style>
+.pref-wrap{display:grid;gap:20px}.pref-hero{background:linear-gradient(120deg,#102a43,#174e63);color:#fff;border-radius:16px;padding:25px 28px;display:flex;justify-content:space-between;align-items:center;gap:18px}.pref-hero .eyebrow{font-size:11px;letter-spacing:1.5px;font-weight:800;color:#9edbd5}.pref-hero h2{font-size:25px;margin:7px 0}.pref-hero p{margin:0;color:#d5e3ec;font-size:13px;max-width:620px;line-height:1.6}.pref-icon{width:58px;height:58px;border-radius:16px;background:#ffffff18;display:grid;place-items:center}.pref-icon svg{width:29px;height:29px}.pref-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:6px;background:#f3f6fa;border:1px solid #e6ebf1;border-radius:12px;width:fit-content}.pref-tabs a{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;text-decoration:none;color:#607086;font-size:13px;font-weight:700}.pref-tabs a.current{background:#fff;color:#102a43;box-shadow:0 2px 8px #152b4512}.pref-tabs svg{width:16px;height:16px}.pref-panel{background:#fff;border:1px solid #e7edf3;border-radius:14px;padding:22px}.pref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}.pref-field{display:grid;gap:8px;color:#40566d;font-size:13px;font-weight:700}.pref-field select{width:100%;padding:12px;border:1px solid #dce4ec;border-radius:9px;background:#fff;color:#243b53;font:inherit}.pref-field small{font-weight:400;color:#8492a4;line-height:1.5}.pref-preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px}.pref-preview-card{padding:15px;border:1px solid #e8edf2;border-radius:10px;background:#f9fbfd}.pref-preview-card small{display:block;color:#8290a2;font-size:11px}.pref-preview-card strong{display:block;color:#18324b;font-size:18px;margin-top:5px}.pref-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:22px}.pref-actions small{color:#718096;font-size:12px}@media(max-width:640px){.pref-hero{padding:20px}.pref-hero h2{font-size:21px}.pref-panel{padding:16px}}
+</style>
+<div class="pref-wrap">
+  <div class="panel" style="margin-bottom:0;">
+    <div class="panel-head"><h2><i data-lucide="settings" class="head-icon"></i> Hospital Settings</h2><span class="pill green">Administrator</span></div>
+    <nav class="pref-tabs" aria-label="Settings pages">
+      <a href="{% url 'hospital_settings' %}"><i data-lucide="sliders-horizontal"></i> General settings</a>
+      <a href="{% url 'security_access' %}"><i data-lucide="shield-check"></i> Security &amp; Access</a>
+      <a class="current" href="{% url 'system_preferences' %}"><i data-lucide="globe-2"></i> System Preferences</a>
+    </nav>
+  </div>
+  <section class="pref-hero">
+    <div><div class="eyebrow">REGIONAL &amp; DISPLAY CONFIGURATION</div><h2>System Preferences</h2><p>Set the hospital's currency, date presentation, local timezone and clock format. These preferences are stored in the hospital database.</p></div>
+    <div class="pref-icon"><i data-lucide="sliders-horizontal"></i></div>
+  </section>
+  <form method="post" class="pref-panel">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save_system_preferences">
+    <div style="margin-bottom:18px;"><h3 style="margin:0 0 5px;color:#18324b;">Regional settings</h3><p style="margin:0;color:#77869a;font-size:13px;">Choose the standards used by the hospital when displaying financial and date/time information.</p></div>
+    <div class="pref-grid">
+      <label class="pref-field">Default currency
+        {{ preferences_form.currency }}
+        <small>UGX is recommended for a hospital operating in Uganda.</small>
+        {% for error in preferences_form.currency.errors %}<small style="color:#c34c40;">{{ error }}</small>{% endfor %}
+      </label>
+      <label class="pref-field">Date format
+        {{ preferences_form.date_format }}
+        <small>Controls the preferred date notation for the system.</small>
+        {% for error in preferences_form.date_format.errors %}<small style="color:#c34c40;">{{ error }}</small>{% endfor %}
+      </label>
+      <label class="pref-field">Timezone
+        {{ preferences_form.time_zone }}
+        <small>Use the timezone that matches the hospital's location.</small>
+        {% for error in preferences_form.time_zone.errors %}<small style="color:#c34c40;">{{ error }}</small>{% endfor %}
+      </label>
+      <div class="pref-field">Clock format
+        <div style="display:flex;gap:15px;flex-wrap:wrap;padding:10px 0;">{% for radio in preferences_form.time_format %}<label style="display:flex;align-items:center;gap:7px;font-weight:600;">{{ radio.tag }} {{ radio.choice_label }}</label>{% endfor %}</div>
+        <small>Choose between 24-hour and 12-hour clock display.</small>
+        {% for error in preferences_form.time_format.errors %}<small style="color:#c34c40;">{{ error }}</small>{% endfor %}
+      </div>
+    </div>
+    <div class="pref-preview">
+      <div class="pref-preview-card"><small>Currency preview</small><strong id="currency-preview">UGX 125,000</strong></div>
+      <div class="pref-preview-card"><small>Date preview</small><strong id="date-preview">25/11/2026</strong></div>
+      <div class="pref-preview-card"><small>Time preview</small><strong id="time-preview">14:30</strong></div>
+      <div class="pref-preview-card"><small>Timezone</small><strong id="timezone-preview" style="font-size:14px;">Africa/Kampala</strong></div>
+    </div>
+    <div class="pref-actions"><small><i data-lucide="shield-check"></i> Only administrators can update these preferences.</small><button type="submit" class="btn-sm btn-primary"><i data-lucide="save"></i> Save system preferences</button></div>
+  </form>
+</div>
+<script>
+(function(){
+ const currency=document.getElementById('id_currency'), date=document.getElementById('id_date_format'), zone=document.getElementById('id_time_zone');
+ const timeInputs=document.querySelectorAll('input[name="time_format"]');
+ function update(){
+  const currencyCode=currency.value||'UGX';
+  document.getElementById('currency-preview').textContent=currencyCode+' 125,000';
+  const formats={'d/m/Y':'25/11/2026','Y-m-d':'2026-11-25','m/d/Y':'11/25/2026'};
+  document.getElementById('date-preview').textContent=formats[date.value]||'25/11/2026';
+  const is12=Array.from(timeInputs).some(x=>x.checked&&x.value==='12');
+  document.getElementById('time-preview').textContent=is12?'2:30 PM':'14:30';
+  document.getElementById('timezone-preview').textContent=(zone.options[zone.selectedIndex]||{}).text||zone.value;
+ }
+ [currency,date,zone,...timeInputs].forEach(el=>el.addEventListener('change',update)); update();
+})();
+</script>
+{% endblock %}
