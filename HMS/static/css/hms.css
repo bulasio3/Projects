@@ -346,3 +346,41 @@ tr:hover td { background:#f9fbfd; }
 .hospital-profile-actions button { display:inline-flex; align-items:center; gap:7px; }
 @media(max-width:900px) { .hospital-profile-layout { grid-template-columns:1fr; } .hospital-logo-preview { min-height:120px; } }
 @media(max-width:520px) { .hospital-profile-fields { grid-template-columns:1fr; } .hospital-field-wide { grid-column:auto; } .hospital-profile-actions { align-items:flex-start; flex-direction:column; } }
+
+
+/* ============ CONSISTENT FORM DESIGN SYSTEM ============ */
+.form-page{display:grid;gap:18px;max-width:1080px;margin:0 auto}
+.form-hero{background:linear-gradient(120deg,#102a43,#174e63);color:#fff;border-radius:16px;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;gap:18px}
+.form-hero .eyebrow{font-size:11px;letter-spacing:1.5px;font-weight:800;color:#9edbd5}
+.form-hero h2{font-size:25px;margin:7px 0}
+.form-hero p{margin:0;color:#d5e3ec;font-size:13px;line-height:1.6;max-width:650px}
+.form-hero-icon{width:56px;height:56px;border-radius:15px;background:#ffffff18;display:grid;place-items:center;flex-shrink:0}
+.form-hero-icon svg{width:27px;height:27px}
+.form-shell{background:#fff;border:1px solid #e7edf3;border-radius:14px;padding:24px;box-shadow:0 2px 8px rgba(16,42,67,.035)}
+.form-section{padding:0 0 22px;margin:0 0 22px;border-bottom:1px solid #edf1f5}
+.form-section:last-of-type{border-bottom:0;margin-bottom:0}
+.form-section-heading{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+.form-section-icon{width:36px;height:36px;border-radius:10px;background:#e8f5f4;color:#0f766e;display:grid;place-items:center;flex-shrink:0}
+.form-section-icon svg{width:18px;height:18px}
+.form-section-heading h3{font-size:15px;color:#18324b;margin:0 0 4px}
+.form-section-heading p{font-size:12px;color:#8190a2;margin:0;line-height:1.5}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.form-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.form-field.wide{grid-column:1/-1}
+.form-field label{font-size:12px;font-weight:750;color:#40566d}
+.form-field label .required{color:#d45a50;margin-left:3px}
+.form-field input:not([type=checkbox]):not([type=radio]),.form-field select,.form-field textarea{width:100%;min-height:44px;padding:11px 12px;border:1px solid #dce4ec;border-radius:9px;background:#fff;color:#243b53;font:inherit;font-size:13px;outline:none;transition:border-color .18s,box-shadow .18s}
+.form-field textarea{min-height:92px;resize:vertical}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:#0f9b91;box-shadow:0 0 0 3px rgba(15,155,145,.12)}
+.form-field input::placeholder,.form-field textarea::placeholder{color:#a0acb9}
+.form-help{font-size:11px;color:#8794a5;line-height:1.5}
+.form-error,.form-errors{font-size:12px;color:#bf3f37}
+.form-errors{padding:12px 14px;background:#fff4f2;border:1px solid #f3d5d1;border-radius:9px;margin-bottom:16px}
+.form-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:18px;border-top:1px solid #edf1f5}
+.form-actions-note{font-size:11px;color:#8190a2;display:flex;align-items:center;gap:7px}
+.form-actions-note svg{width:15px;height:15px;color:#0f766e}
+.form-submit{padding:11px 18px;border:0;border-radius:9px;background:#102a43;color:#fff;font-size:13px;font-weight:750;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.form-submit:hover{background:#174e63}
+.form-cancel{padding:10px 15px;border:1px solid #dce4ec;border-radius:9px;color:#607086;text-decoration:none;font-size:13px;font-weight:650}
+.form-field input[type=checkbox]{width:17px;height:17px;accent-color:#0f766e}
+@media(max-width:700px){.form-hero{padding:20px}.form-hero h2{font-size:21px}.form-shell{padding:17px}.form-grid{grid-template-columns:1fr}.form-field.wide{grid-column:auto}.form-actions{align-items:stretch}.form-submit,.form-cancel{justify-content:center}}
