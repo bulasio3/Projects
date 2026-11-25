@@ -313,7 +313,7 @@ def user_edit(request, pk):
 
 # --- DOCTOR DIRECTORY ---
 @login_required
-@role_required(['admin', 'doctor'])
+@role_required(['admin', 'doctor', 'reception', 'nurse', 'pharmacist', 'lab', 'patient'])
 def doctor_list(request):
     # Backfill missing profiles for existing accounts assigned the Doctor role.
     # get_or_create is safe to repeat and never overwrites existing doctor details.
