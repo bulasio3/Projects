@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
 from .models import *
-from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm, AppointmentConfigurationForm
+from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm, AppointmentConfigurationForm, NotificationSettingsForm
 from django.core.exceptions import PermissionDenied
 from functools import wraps
 
@@ -308,9 +308,17 @@ def doctor_list(request):
 def hospital_settings(request):
     profile, _ = HospitalSettings.objects.get_or_create(pk=1)
     appointment_config, _ = AppointmentConfiguration.objects.get_or_create(pk=1)
+    notification_settings, _ = NotificationSettings.objects.get_or_create(pk=1)
 
     if request.method == 'POST':
         action = request.POST.get('action')
+        if action == 'save_notifications':
+            notification_form = NotificationSettingsForm(request.POST, instance=notification_settings)
+            if notification_form.is_valid():
+                notification_form.save()
+                messages.success(request, 'Notification preferences saved successfully.')
+                return redirect('hospital_settings')
+            messages.error(request, 'Please review the notification preferences.')
         if action == 'save_appointment_config':
             appointment_form = AppointmentConfigurationForm(request.POST, instance=appointment_config)
             if appointment_form.is_valid():
@@ -349,6 +357,8 @@ def hospital_settings(request):
         profile_form = HospitalSettingsForm(instance=profile)
     if request.method != 'POST' or request.POST.get('action') != 'save_appointment_config':
         appointment_form = AppointmentConfigurationForm(instance=appointment_config)
+    if request.method != 'POST' or request.POST.get('action') != 'save_notifications':
+        notification_form = NotificationSettingsForm(instance=notification_settings)
 
     return render(request, 'settings/index.html', {
         'departments': Department.objects.order_by('name'),
@@ -357,6 +367,8 @@ def hospital_settings(request):
         'profile_form': profile_form,
         'appointment_config': appointment_config,
         'appointment_form': appointment_form,
+        'notification_settings': notification_settings,
+        'notification_form': notification_form,
         'page_title': 'Hospital Settings',
         'active_nav': 'settings',
     })
