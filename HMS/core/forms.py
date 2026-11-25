@@ -6,6 +6,15 @@ class PatientForm(forms.ModelForm):
         model = Patient
         fields = ['full_name', 'dob', 'gender', 'blood_group', 'phone', 'email', 'address', 'emergency_contact', 'allergies']
         widgets = {
+            'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter patient full name', 'required': 'required'}),
+            'dob': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'gender': forms.Select(attrs={'class': 'form-control', 'required': 'required'}),
+            'blood_group': forms.Select(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 07XX XXX XXX', 'required': 'required'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'patient@example.com'}),
+            'address': forms.Textarea(attrs={'rows': 2, 'class': 'form-control', 'placeholder': 'Residential address'}),
+            'emergency_contact': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name and phone number'}),
+            'allergies': forms.Textarea(attrs={'rows': 2, 'class': 'form-control', 'placeholder': 'Record known allergies, or leave blank if none'}),
             'dob': forms.DateInput(attrs={'type': 'date'}),
             'address': forms.Textarea(attrs={'rows': 2}),
             'allergies': forms.Textarea(attrs={'rows': 2}),
@@ -16,9 +25,12 @@ class AppointmentForm(forms.ModelForm):
         model = Appointment
         fields = ['patient', 'doctor', 'date', 'time', 'reason', 'notes']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'time': forms.TimeInput(attrs={'type': 'time'}),
-            'notes': forms.Textarea(attrs={'rows': 2}),
+            'patient': forms.Select(attrs={'class': 'form-control', 'required': 'required'}),
+            'doctor': forms.Select(attrs={'class': 'form-control', 'required': 'required'}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'required': 'required'}),
+            'time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control', 'required': 'required'}),
+            'reason': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. General consultation'}),
+            'notes': forms.Textarea(attrs={'rows': 2, 'class': 'form-control', 'placeholder': 'Additional information (optional)'}),
         }
 
 class StaffUserForm(forms.ModelForm):
@@ -136,7 +148,9 @@ class InvoiceForm(forms.ModelForm):
         model = Invoice
         fields = ['patient', 'appointment', 'total']
         widgets = {
-            'total': forms.NumberInput(attrs={'min': '0.01', 'step': '0.01', 'placeholder': 'Enter invoice total'}),
+            'patient': forms.Select(attrs={'class': 'form-control', 'required': 'required'}),
+            'appointment': forms.Select(attrs={'class': 'form-control'}),
+            'total': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01', 'step': '0.01', 'placeholder': 'Enter invoice total', 'required': 'required'}),
         }
 
     def clean_total(self):
