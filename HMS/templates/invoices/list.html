@@ -14,8 +14,8 @@
       <tr>
         <td>INV-{{ i.id|stringformat:"04d" }}</td>
         <td>{{ i.patient.full_name }}</td>
-        <td>{{ i.created_at|date:"M d, Y" }}</td>
-        <td>{{ currency_code }} {{ i.total|floatformat:2 }}</td>
+        <td>{{ i.created_at|date:system_date_format }}</td>
+        <td>{{ currency_code|default:system_currency }} {{ i.total|floatformat:2 }}</td>
         <td>{% include 'partials/pill.html' with text=i.get_status_display tone="orange" %}</td>
         <td>
           {% if i.status == 'unpaid' %}
