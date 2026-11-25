@@ -327,3 +327,22 @@ tr:hover td { background:#f9fbfd; }
 .config-error { display:block; color:#b42318; font-size:11px; margin-top:7px; }
 @media(max-width:760px) { .appointment-config-grid { grid-template-columns:1fr; } .appointment-config-section { padding:17px; } }
 @media(max-width:520px) { .appointment-config-heading,.config-actions { align-items:flex-start; flex-direction:column; } .working-day-picker { gap:4px; } .day-choice { min-height:35px; } .day-choice span { font-size:9px; } .time-fields { grid-template-columns:1fr; } .schedule-preview { padding:13px; gap:9px; } .schedule-preview-copy strong { font-size:12px; } }
+
+
+/* ============ HOSPITAL PROFILE MATCHED SETTINGS DESIGN ============ */
+.hospital-profile-layout { display:grid; grid-template-columns:minmax(220px,.78fr) minmax(0,2fr); gap:15px; align-items:stretch; }
+.hospital-profile-section .config-card { height:100%; }
+.hospital-logo-preview { display:flex; align-items:center; justify-content:center; min-height:150px; margin:0 0 16px; padding:16px; border:1px dashed #d6e5e9; border-radius:11px; background:linear-gradient(135deg,#f6fbfc,#eef8f7); }
+.hospital-logo-preview img { display:block; max-width:100%; max-height:125px; object-fit:contain; border-radius:7px; }
+.hospital-logo-placeholder { display:flex; flex-direction:column; align-items:center; gap:8px; color:#9aabb9; }
+.hospital-logo-placeholder [data-lucide] { width:34px; height:34px; color:#159b9b; }
+.hospital-logo-placeholder small { font-size:10px; color:#8796a5; }
+.hospital-profile-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.hospital-field-wide { grid-column:1/-1; }
+.hospital-profile-fields textarea { min-height:76px; resize:vertical; }
+.hospital-profile-section .config-field input,.hospital-profile-section .config-field textarea,.hospital-profile-section .config-field select { width:100%; box-sizing:border-box; padding:11px 12px; border:1px solid #dce5ec; border-radius:8px; background:#fbfcfd; color:#263d58; font:inherit; font-size:13px; outline:none; transition:border .2s,box-shadow .2s; }
+.hospital-profile-section .config-field input:focus,.hospital-profile-section .config-field textarea:focus,.hospital-profile-section .config-field select:focus { border-color:#159b9b; box-shadow:0 0 0 3px rgba(21,155,155,.12); background:#fff; }
+.hospital-profile-actions { padding-top:15px; border-top:1px solid #edf1f5; }
+.hospital-profile-actions button { display:inline-flex; align-items:center; gap:7px; }
+@media(max-width:900px) { .hospital-profile-layout { grid-template-columns:1fr; } .hospital-logo-preview { min-height:120px; } }
+@media(max-width:520px) { .hospital-profile-fields { grid-template-columns:1fr; } .hospital-field-wide { grid-column:auto; } .hospital-profile-actions { align-items:flex-start; flex-direction:column; } }
