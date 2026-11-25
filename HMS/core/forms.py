@@ -32,10 +32,10 @@ class AppointmentForm(forms.ModelForm):
 
 class StaffUserForm(forms.ModelForm):
     from .models import Department
-    specialization = forms.CharField(required=False, max_length=100, widget=forms.TextInput(attrs={'placeholder': 'e.g. General Practitioner'}))
-    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False)
-    license_no = forms.CharField(required=False, max_length=50, label='Medical licence number')
-    consultation_fee = forms.DecimalField(required=False, min_value=0, max_digits=10, decimal_places=2, initial=0, widget=forms.NumberInput(attrs={'min': '0', 'step': '0.01'}))
+    specialization = forms.CharField(required=False, max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. General Practitioner'}))
+    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False, widget=forms.Select(attrs={'class': 'form-control'}))
+    license_no = forms.CharField(required=False, max_length=50, label='Medical licence number', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Professional registration number'}))
+    consultation_fee = forms.DecimalField(required=False, min_value=0, max_digits=10, decimal_places=2, initial=0, widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.01', 'placeholder': '0.00'}))
     password1 = forms.CharField(label='Password', required=False, widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'form-control', 'placeholder': 'At least 8 characters'}))
     password2 = forms.CharField(label='Confirm password', required=False, widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'form-control', 'placeholder': 'Re-enter password'}))
 
@@ -55,6 +55,8 @@ class StaffUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        for required_name in ('first_name', 'last_name', 'email', 'phone'):
+            self.fields[required_name].required = True
         if self.instance is None or not self.instance.pk:
             self.fields['password1'].required = True
             self.fields['password2'].required = True
