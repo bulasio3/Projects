@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
 from .models import *
-from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm, AppointmentConfigurationForm, NotificationSettingsForm, SystemPreferencesForm
+from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm, AppointmentConfigurationForm, NotificationSettingsForm, SystemPreferencesForm, InvoiceForm
 from django.core.exceptions import PermissionDenied
 from functools import wraps
 
@@ -197,6 +197,24 @@ def callback_done(request, pk):
 
 
 # --- BILLING ---
+@login_required
+@role_required(['admin', 'reception'])
+def invoice_create(request):
+    form = InvoiceForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        invoice = form.save()
+        messages.success(request, f'Invoice INV-{invoice.id:04d} created for {invoice.patient.full_name}.')
+        return redirect('invoice_list')
+    preferences, _ = SystemPreferences.objects.get_or_create(pk=1)
+    return render(request, 'invoices/form.html', {
+        'form': form,
+        'currency_code': preferences.currency,
+        'page_title': 'Create Invoice',
+        'active_nav': 'billing',
+    })
+
+
+
 @login_required
 @role_required(['admin', 'reception'])
 def billing_view(request):
