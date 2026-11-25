@@ -36,16 +36,28 @@ class StaffUserForm(forms.ModelForm):
     department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False)
     license_no = forms.CharField(required=False, max_length=50, label='Medical licence number')
     consultation_fee = forms.DecimalField(required=False, min_value=0, max_digits=10, decimal_places=2, initial=0, widget=forms.NumberInput(attrs={'min': '0', 'step': '0.01'}))
-    password1 = forms.CharField(label='Password', required=False, widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}))
-    password2 = forms.CharField(label='Confirm password', required=False, widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}))
+    password1 = forms.CharField(label='Password', required=False, widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'form-control', 'placeholder': 'At least 8 characters'}))
+    password2 = forms.CharField(label='Confirm password', required=False, widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'form-control', 'placeholder': 'Re-enter password'}))
 
     class Meta:
         from .models import User
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'phone', 'role', 'is_active']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. jdoe', 'required': 'required'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First name', 'required': 'required'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last name', 'required': 'required'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'name@hospital.org', 'required': 'required'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 07XX XXX XXX', 'required': 'required'}),
+            'role': forms.Select(attrs={'class': 'form-control', 'required': 'required'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-control'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance is None or not self.instance.pk:
+            self.fields['password1'].required = True
+            self.fields['password2'].required = True
         if self.instance and self.instance.pk and self.instance.role == 'doctor':
             from .models import Doctor
             profile = Doctor.objects.filter(user=self.instance).first()
