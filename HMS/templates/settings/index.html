@@ -7,6 +7,45 @@
     <span class="pill green">Administrator</span>
   </div>
   <p style="color:#6b7a8f;margin:0 0 20px;">Manage the hospital's operational setup. Changes made here are saved to the hospital database.</p>
+  <div style="border:1px solid #e5eaf0;border-radius:10px;padding:18px;margin-bottom:22px;">
+    <h3 style="margin:0 0 6px;">Hospital profile</h3>
+    <p style="color:#6b7a8f;font-size:13px;margin:0 0 16px;">These details are stored in the hospital database and can be reused on invoices and reports.</p>
+    {% if profile.logo_url %}
+    <div style="margin-bottom:14px;"><img src="{{ profile.logo_url }}" alt="Hospital logo" style="max-width:150px;max-height:75px;object-fit:contain;border:1px solid #e5eaf0;border-radius:8px;padding:6px;"></div>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_profile">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+        <label style="font-size:13px;color:#465568;">Hospital name
+          {{ profile_form.hospital_name }}
+          {% for error in profile_form.hospital_name.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
+        </label>
+        <label style="font-size:13px;color:#465568;">Logo image URL
+          {{ profile_form.logo_url }}
+          {% for error in profile_form.logo_url.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
+        </label>
+        <label style="font-size:13px;color:#465568;">Telephone
+          {{ profile_form.telephone }}
+          {% for error in profile_form.telephone.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
+        </label>
+        <label style="font-size:13px;color:#465568;">Official email
+          {{ profile_form.email }}
+          {% for error in profile_form.email.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
+        </label>
+        <label style="font-size:13px;color:#465568;grid-column:1/-1;">Physical address
+          {{ profile_form.address }}
+          {% for error in profile_form.address.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
+        </label>
+        <label style="font-size:13px;color:#465568;grid-column:1/-1;">Operating hours
+          {{ profile_form.operating_hours }}
+          {% for error in profile_form.operating_hours.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
+        </label>
+      </div>
+      {% if profile_form.non_field_errors %}<div style="color:#b42318;margin-top:10px;">{{ profile_form.non_field_errors }}</div>{% endif %}
+      <button type="submit" class="btn-sm btn-primary" style="padding:11px 18px;margin-top:16px;">Save hospital profile</button>
+    </form>
+  </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:22px;">
     <div style="padding:16px;border:1px solid #e5eaf0;border-radius:10px;">
       <div style="color:#6b7a8f;font-size:12px;">Departments</div>
