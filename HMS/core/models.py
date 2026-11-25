@@ -186,3 +186,20 @@ class CallbackRequest(models.Model):
     requested_at = models.DateTimeField(auto_now_add=True)
     handled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     handled_at = models.DateTimeField(null=True, blank=True)
+
+class HospitalSettings(models.Model):
+    """Single-row configuration for the hospital's public profile."""
+    hospital_name = models.CharField(max_length=200, default='MediCare Hospital')
+    logo_url = models.URLField(blank=True)
+    address = models.TextField(blank=True)
+    telephone = models.CharField(max_length=30, blank=True)
+    email = models.EmailField(blank=True)
+    operating_hours = models.CharField(max_length=120, default='Open 24 hours')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.hospital_name
