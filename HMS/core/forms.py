@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Appointment, HospitalSettings, AppointmentConfiguration, NotificationSettings
+from .models import Patient, Appointment, HospitalSettings, AppointmentConfiguration, NotificationSettings, SystemPreferences
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -100,4 +100,16 @@ class NotificationSettingsForm(forms.ModelForm):
         ]
         widgets = {
             'reminder_hours_before': forms.Select(),
+        }
+
+
+class SystemPreferencesForm(forms.ModelForm):
+    class Meta:
+        model = SystemPreferences
+        fields = ['currency', 'date_format', 'time_zone', 'time_format']
+        widgets = {
+            'currency': forms.Select(),
+            'date_format': forms.Select(),
+            'time_zone': forms.Select(),
+            'time_format': forms.RadioSelect(),
         }
