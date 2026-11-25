@@ -15,9 +15,6 @@ class PatientForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'rows': 2, 'class': 'form-control', 'placeholder': 'Residential address'}),
             'emergency_contact': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name and phone number'}),
             'allergies': forms.Textarea(attrs={'rows': 2, 'class': 'form-control', 'placeholder': 'Record known allergies, or leave blank if none'}),
-            'dob': forms.DateInput(attrs={'type': 'date'}),
-            'address': forms.Textarea(attrs={'rows': 2}),
-            'allergies': forms.Textarea(attrs={'rows': 2}),
         }
 
 class AppointmentForm(forms.ModelForm):
