@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from datetime import time
 
 
 class User(AbstractUser):
@@ -203,3 +204,29 @@ class HospitalSettings(models.Model):
 
     def __str__(self):
         return self.hospital_name
+
+
+class AppointmentConfiguration(models.Model):
+    """Single-row appointment booking and clinic-hours configuration."""
+    DURATION_CHOICES = [(15, '15 minutes'), (30, '30 minutes'), (45, '45 minutes'), (60, '60 minutes')]
+
+    appointment_duration = models.PositiveSmallIntegerField(choices=DURATION_CHOICES, default=30)
+    monday = models.BooleanField(default=True)
+    tuesday = models.BooleanField(default=True)
+    wednesday = models.BooleanField(default=True)
+    thursday = models.BooleanField(default=True)
+    friday = models.BooleanField(default=True)
+    saturday = models.BooleanField(default=False)
+    sunday = models.BooleanField(default=False)
+    opening_time = models.TimeField(default=time(8, 0))
+    closing_time = models.TimeField(default=time(17, 0))
+    max_appointments_per_doctor = models.PositiveSmallIntegerField(default=12)
+    online_booking_enabled = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return 'Hospital appointment configuration'
