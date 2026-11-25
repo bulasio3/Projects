@@ -36,6 +36,35 @@
       {% empty %}<tr><td colspan="6" style="text-align:center;padding:24px;color:#77869a;">No staff accounts are available.</td></tr>{% endfor %}
     </tbody></table></div>
   </section>
+  <section class="security-panel" id="staff-accounts">
+    <div class="security-panel-head"><div><h3>Staff account security</h3><p>Search staff, filter by role or status, and activate or deactivate access.</p></div><span class="security-status active">Admin controls</span></div>
+    <form method="get" action="{% url 'security_access' %}#staff-accounts" style="display:grid;grid-template-columns:minmax(180px,2fr) repeat(2,minmax(140px,1fr)) auto auto;gap:9px;margin-bottom:16px;align-items:center;">
+      <input type="search" name="q" value="{{ q }}" placeholder="Search name, username or email" style="min-width:0;padding:10px 12px;border:1px solid #dce4ec;border-radius:8px;">
+      <select name="role" style="padding:10px;border:1px solid #dce4ec;border-radius:8px;background:#fff;"><option value="">All staff roles</option>{% for value,label in role_choices %}<option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+      <select name="status" style="padding:10px;border:1px solid #dce4ec;border-radius:8px;background:#fff;"><option value="">All statuses</option><option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option><option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inactive</option></select>
+      <button class="btn-sm btn-primary" type="submit">Filter</button><a class="btn-ghost" href="{% url 'security_access' %}#staff-accounts">Reset</a>
+    </form>
+    <div style="overflow-x:auto;"><table class="security-table" style="min-width:720px;"><thead><tr><th>Staff member</th><th>Role</th><th>Status</th><th>Last login</th><th>Account access</th></tr></thead><tbody>
+      {% for account in account_users %}<tr>
+        <td class="account-name">{{ account.get_full_name|default:account.username }}<br><small style="font-weight:400;color:#8190a2;">@{{ account.username }} · {{ account.email|default:"No email" }}</small></td>
+        <td>{{ account.get_role_display }}</td>
+        <td>{% if account.is_active %}<span class="security-status active">Active</span>{% else %}<span class="security-status inactive">Inactive</span>{% endif %}</td>
+        <td>{{ account.last_login|date:'M d, Y H:i'|default:'Never' }}</td>
+        <td>
+          {% if account.pk == request.user.pk %}<span style="font-size:11px;color:#718096;">Current account protected</span>
+          {% elif account.role == 'admin' and account.is_active and active_admins <= 1 %}<span style="font-size:11px;color:#718096;">Last admin protected</span>
+          {% else %}
+          <form method="post" style="display:inline;" onsubmit="return confirm('{% if account.is_active %}Deactivate{% else %}Activate{% endif %} {{ account.username|escapejs }}?');">
+            {% csrf_token %}<input type="hidden" name="action" value="toggle_staff_status"><input type="hidden" name="account_id" value="{{ account.pk }}">
+            <button type="submit" class="btn-ghost" style="{% if account.is_active %}color:#c34c40;{% else %}color:#16804a;{% endif %}">{% if account.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+          </form>
+          {% endif %}
+          <a class="btn-ghost" href="{% url 'user_edit' account.pk %}" style="margin-left:5px;">Edit</a>
+        </td>
+      </tr>{% empty %}<tr><td colspan="5" style="text-align:center;padding:24px;color:#77869a;">No staff accounts match these filters.</td></tr>{% endfor %}
+    </tbody></table></div>
+    <p style="font-size:11px;color:#7b8999;margin:12px 0 0;">Deactivated accounts cannot sign in. Existing account records and related hospital data are retained.</p>
+  </section>
   <section class="security-panel">
     <div class="security-panel-head"><div><h3>Security safeguards</h3><p>Current protections built into account management.</p></div></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
