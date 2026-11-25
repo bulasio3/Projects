@@ -36,45 +36,78 @@
     <span class="pill green">Administrator</span>
   </div>
   <p style="color:#6b7a8f;margin:0 0 20px;">Manage the hospital's operational setup. Changes made here are saved to the hospital database.</p>
-  <div style="border:1px solid #e5eaf0;border-radius:10px;padding:18px;margin-bottom:22px;">
-    <h3 style="margin:0 0 6px;">Hospital profile</h3>
-    <p style="color:#6b7a8f;font-size:13px;margin:0 0 16px;">These details are stored in the hospital database and can be reused on invoices and reports.</p>
-    {% if profile.logo_url %}
-    <div style="margin-bottom:14px;"><img src="{{ profile.logo_url }}" alt="Hospital logo" style="max-width:150px;max-height:75px;object-fit:contain;border:1px solid #e5eaf0;border-radius:8px;padding:6px;"></div>
-    {% endif %}
-    <form method="post">
+  <section class="appointment-config-section hospital-profile-section" id="hospital-profile-section">
+    <div class="appointment-config-heading">
+      <div>
+        <span class="panel-kicker">HOSPITAL IDENTITY & CONTACT</span>
+        <h3>Hospital profile</h3>
+        <p>Manage the hospital's identity and official contact information.</p>
+      </div>
+      <span class="config-live-pill"><span></span> Profile information</span>
+    </div>
+
+    <form method="post" id="hospital-profile-form">
       {% csrf_token %}
       <input type="hidden" name="action" value="save_profile">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
-        <label style="font-size:13px;color:#465568;">Hospital name
-          {{ profile_form.hospital_name }}
-          {% for error in profile_form.hospital_name.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
-        </label>
-        <label style="font-size:13px;color:#465568;">Logo image URL
-          {{ profile_form.logo_url }}
-          {% for error in profile_form.logo_url.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
-        </label>
-        <label style="font-size:13px;color:#465568;">Telephone
-          {{ profile_form.telephone }}
-          {% for error in profile_form.telephone.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
-        </label>
-        <label style="font-size:13px;color:#465568;">Official email
-          {{ profile_form.email }}
-          {% for error in profile_form.email.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
-        </label>
-        <label style="font-size:13px;color:#465568;grid-column:1/-1;">Physical address
-          {{ profile_form.address }}
-          {% for error in profile_form.address.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
-        </label>
-        <label style="font-size:13px;color:#465568;grid-column:1/-1;">Operating hours
-          {{ profile_form.operating_hours }}
-          {% for error in profile_form.operating_hours.errors %}<small style="color:#b42318;">{{ error }}</small>{% endfor %}
-        </label>
+
+      <div class="hospital-profile-layout">
+        <div class="config-card hospital-logo-card">
+          <div class="config-card-title">
+            <span class="config-icon"><i data-lucide="image"></i></span>
+            <div><strong>Hospital logo</strong><small>Brand identity displayed on hospital materials</small></div>
+          </div>
+          <div class="hospital-logo-preview" id="hospital-logo-preview">
+            {% if profile.logo_url %}
+              <img src="{{ profile.logo_url }}" alt="Hospital logo" id="hospital-logo-image">
+            {% else %}
+              <span class="hospital-logo-placeholder"><i data-lucide="hospital"></i><small>Logo preview</small></span>
+            {% endif %}
+          </div>
+          <label class="config-field">Logo image URL
+            {{ profile_form.logo_url }}
+          </label>
+          {% for error in profile_form.logo_url.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+          <small class="config-hint">Paste a publicly accessible PNG or JPG image URL.</small>
+        </div>
+
+        <div class="config-card hospital-details-card">
+          <div class="config-card-title">
+            <span class="config-icon"><i data-lucide="building-2"></i></span>
+            <div><strong>Hospital information</strong><small>Official name and communication details</small></div>
+          </div>
+          <div class="hospital-profile-fields">
+            <label class="config-field hospital-field-wide">Hospital name
+              {{ profile_form.hospital_name }}
+              {% for error in profile_form.hospital_name.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+            <label class="config-field">Telephone
+              {{ profile_form.telephone }}
+              {% for error in profile_form.telephone.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+            <label class="config-field">Official email
+              {{ profile_form.email }}
+              {% for error in profile_form.email.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+            <label class="config-field hospital-field-wide">Physical address
+              {{ profile_form.address }}
+              {% for error in profile_form.address.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+            <label class="config-field hospital-field-wide">Operating hours
+              {{ profile_form.operating_hours }}
+              {% for error in profile_form.operating_hours.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+          </div>
+        </div>
       </div>
-      {% if profile_form.non_field_errors %}<div style="color:#b42318;margin-top:10px;">{{ profile_form.non_field_errors }}</div>{% endif %}
-      <button type="submit" class="btn-sm btn-primary" style="padding:11px 18px;margin-top:16px;">Save hospital profile</button>
+
+      {% if profile_form.non_field_errors %}<div class="config-error">{{ profile_form.non_field_errors }}</div>{% endif %}
+      <div class="config-actions hospital-profile-actions">
+        <span><i data-lucide="shield-check"></i> Profile details are securely stored in the hospital database.</span>
+        <button type="submit" class="btn-sm btn-primary"><i data-lucide="save"></i> Save hospital profile</button>
+      </div>
     </form>
-  </div>
+  </section>
+div>
   <section class="appointment-config-section" id="appointment-config-section">
     <div class="appointment-config-heading">
       <div>
