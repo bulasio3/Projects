@@ -28,7 +28,7 @@
 
     <!-- Admin & Doctors -->
     {% if current_role == 'admin' or current_role == 'doctor' %}
-      <a href="#" class="{% if active_nav == 'doctors' %}active{% endif %}">
+      <a href="{% url 'doctor_list' %}" class="{% if active_nav == 'doctors' %}active{% endif %}">
         <i data-lucide="stethoscope"></i><span>Doctors</span>
       </a>
     {% endif %}
