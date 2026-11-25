@@ -16,8 +16,8 @@
       <tr>
         <td>{{ a.patient.full_name }}</td>
         <td>Dr. {{ a.doctor.user.get_full_name }}</td>
-        <td>{{ a.date|date:"M d, Y" }}</td>
-        <td>{{ a.time|time:"H:i" }}</td>
+        <td>{{ a.date|date:system_date_format }}</td>
+        <td>{{ a.time|time:system_time_format }}</td>
         <td>{{ a.reason|default:"—" }}</td>
         <td>{% include 'partials/pill.html' with text=a.get_status_display tone="blue" %}</td>
         <td>
