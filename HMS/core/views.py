@@ -81,9 +81,10 @@ def dashboard(request):
         if doctor:
             doctor_appointments = Appointment.objects.filter(doctor=doctor)
             today_appointments = doctor_appointments.filter(date=today).select_related('patient').order_by('time')
+            completed_today_appointments = today_appointments.filter(status='completed')
             upcoming_appointments = doctor_appointments.filter(
-                date__gt=today
-            ).exclude(status__in=['cancelled', 'no_show']).select_related('patient').order_by('date', 'time')[:6]
+                date__gte=today
+            ).exclude(status__in=['completed', 'cancelled', 'no_show']).select_related('patient').order_by('date', 'time')[:8]
             pending_labs = LabTest.objects.filter(
                 doctor=doctor
             ).exclude(status__in=['ready', 'cancelled']).select_related('patient').order_by('-created_at')[:5]
@@ -107,7 +108,9 @@ def dashboard(request):
             ctx.update({
                 'doctor_profile': doctor,
                 'my_appointments': today_appointments,
+                'completed_today_appointments': completed_today_appointments,
                 'upcoming_appointments': upcoming_appointments,
+                'upcoming_count': doctor_appointments.filter(date__gte=today).exclude(status__in=['completed', 'cancelled', 'no_show']).count(),
                 'pending_labs': pending_labs,
                 'ready_labs': ready_labs,
                 'recent_records': recent_records,
@@ -129,7 +132,9 @@ def dashboard(request):
             ctx.update({
                 'doctor_profile': None,
                 'my_appointments': Appointment.objects.none(),
+                'completed_today_appointments': Appointment.objects.none(),
                 'upcoming_appointments': Appointment.objects.none(),
+                'upcoming_count': 0,
                 'pending_labs': LabTest.objects.none(),
                 'ready_labs': LabTest.objects.none(),
                 'recent_records': MedicalRecord.objects.none(),
