@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Security & Access — MediCare{% endblock %}
+{% block content %}
+<style>
+.security-wrap{display:grid;gap:20px}.security-hero{background:linear-gradient(120deg,#102a43,#174e63);color:#fff;border-radius:16px;padding:25px 28px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.security-hero .eyebrow{font-size:11px;letter-spacing:1.5px;font-weight:800;color:#9edbd5}.security-hero h2{font-size:25px;margin:7px 0}.security-hero p{margin:0;color:#d5e3ec;font-size:13px;max-width:620px;line-height:1.6}.security-hero-icon{width:58px;height:58px;border-radius:16px;background:#ffffff18;display:grid;place-items:center}.security-hero-icon svg{width:29px;height:29px}.security-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:6px;background:#f3f6fa;border:1px solid #e6ebf1;border-radius:12px;width:fit-content}.security-tabs a{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;text-decoration:none;color:#607086;font-size:13px;font-weight:700}.security-tabs a.current{background:#fff;color:#102a43;box-shadow:0 2px 8px #152b4512}.security-tabs svg{width:16px;height:16px}.security-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:13px}.security-metric{background:#fff;border:1px solid #e7edf3;border-radius:13px;padding:17px;display:flex;gap:13px;align-items:center}.security-metric-icon{width:42px;height:42px;border-radius:11px;background:#eaf5f4;color:#147d78;display:grid;place-items:center;flex-shrink:0}.security-metric-icon svg{width:20px;height:20px}.security-metric small{display:block;color:#758397;font-size:12px}.security-metric strong{display:block;color:#18324b;font-size:25px;margin-top:3px}.security-panel{background:#fff;border:1px solid #e7edf3;border-radius:14px;padding:20px}.security-panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:15px}.security-panel-head h3{margin:0;color:#18324b;font-size:16px}.security-panel-head p{margin:5px 0 0;color:#758397;font-size:12px}.security-role-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.security-role{border:1px solid #e8edf2;border-radius:10px;padding:14px}.security-role strong{display:block;font-size:13px;color:#20384f}.security-role .role-count{font-size:22px;font-weight:800;color:#147d78;margin:7px 0 3px}.security-role small{color:#77869a;font-size:11px}.security-note{display:flex;gap:12px;align-items:flex-start;padding:15px;border-radius:11px;background:#f2f7fb;color:#40566d;font-size:12px;line-height:1.6}.security-note svg{width:19px;height:19px;color:#147d78;flex-shrink:0}.security-actions{display:flex;gap:9px;flex-wrap:wrap}.security-actions a{display:inline-flex;align-items:center;gap:8px;text-decoration:none}.security-actions svg{width:15px;height:15px}.security-table{width:100%;border-collapse:collapse}.security-table th,.security-table td{padding:12px 10px;border-bottom:1px solid #edf1f5;text-align:left;font-size:12px}.security-table th{color:#718096;font-weight:700}.security-table td{color:#34495e}.security-table .account-name{font-weight:700;color:#1d344a}.security-status{display:inline-flex;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:800}.security-status.active{background:#e8f7ef;color:#16804a}.security-status.inactive{background:#fff0ee;color:#c34c40}
+@media(max-width:640px){.security-hero{padding:20px}.security-hero h2{font-size:21px}.security-panel{padding:15px}.security-table{min-width:620px}}
+</style>
+<div class="security-wrap">
+  <div class="panel" style="margin-bottom:0;">
+    <div class="panel-head"><h2><i data-lucide="settings" class="head-icon"></i> Hospital Settings</h2><span class="pill green">Administrator</span></div>
+    <nav class="settings-page-tabs" aria-label="Settings pages">
+      <a class="settings-page-tab" href="{% url 'hospital_settings' %}"><i data-lucide="sliders-horizontal"></i> General settings</a>
+      <a class="settings-page-tab active" href="{% url 'security_access' %}"><i data-lucide="shield-check"></i> Security &amp; Access</a>
+    </nav>
+  </div>
+  <section class="security-hero">
+    <div><div class="eyebrow">HOSPITAL ADMINISTRATION</div><h2>Security &amp; Access</h2><p>Monitor staff account access, review role assignments and manage who can enter the hospital management system.</p></div>
+    <div class="security-hero-icon"><i data-lucide="shield-check"></i></div>
+  </section>
+  <div class="security-metrics">
+    <div class="security-metric"><span class="security-metric-icon"><i data-lucide="users"></i></span><div><small>Total staff accounts</small><strong>{{ total_staff }}</strong></div></div>
+    <div class="security-metric"><span class="security-metric-icon"><i data-lucide="user-check"></i></span><div><small>Active staff</small><strong>{{ active_staff }}</strong></div></div>
+    <div class="security-metric"><span class="security-metric-icon"><i data-lucide="user-x"></i></span><div><small>Inactive accounts</small><strong>{{ inactive_staff }}</strong></div></div>
+    <div class="security-metric"><span class="security-metric-icon"><i data-lucide="shield"></i></span><div><small>Active administrators</small><strong>{{ active_admins }}</strong></div></div>
+  </div>
+  <section class="security-panel">
+    <div class="security-panel-head"><div><h3>Role access overview</h3><p>Staff distribution and active accounts by assigned system role.</p></div></div>
+    <div class="security-role-grid">
+      {% for item in role_summary %}<div class="security-role"><strong>{{ item.label }}</strong><div class="role-count">{{ item.total }}</div><small>{{ item.active }} active account{{ item.active|pluralize }}</small></div>{% endfor %}
+    </div>
+  </section>
+  <section class="security-panel">
+    <div class="security-panel-head"><div><h3>Recent staff accounts</h3><p>Latest staff accounts registered in the system.</p></div><div class="security-actions"><a class="btn-sm btn-primary" href="{% url 'user_list' %}"><i data-lucide="users"></i> Manage users &amp; roles</a><a class="btn-ghost" href="{% url 'user_create' %}"><i data-lucide="user-plus"></i> Add account</a></div></div>
+    <div style="overflow-x:auto;"><table class="security-table"><thead><tr><th>Staff member</th><th>Username</th><th>Role</th><th>Account status</th><th>Last login</th><th></th></tr></thead><tbody>
+      {% for account in recent_accounts %}<tr><td class="account-name">{{ account.get_full_name|default:account.username }}</td><td>@{{ account.username }}</td><td>{{ account.get_role_display }}</td><td>{% if account.is_active %}<span class="security-status active">Active</span>{% else %}<span class="security-status inactive">Inactive</span>{% endif %}</td><td>{{ account.last_login|date:'M d, Y H:i'|default:'Never' }}</td><td><a class="btn-ghost" href="{% url 'user_edit' account.pk %}">Review</a></td></tr>
+      {% empty %}<tr><td colspan="6" style="text-align:center;padding:24px;color:#77869a;">No staff accounts are available.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  <section class="security-panel">
+    <div class="security-panel-head"><div><h3>Security safeguards</h3><p>Current protections built into account management.</p></div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+      <div class="security-note"><i data-lucide="lock-keyhole"></i><div><strong>Administrator-only access</strong><br>Only authenticated administrator accounts can open this page or manage staff roles.</div></div>
+      <div class="security-note"><i data-lucide="key-round"></i><div><strong>Password protection</strong><br>New account passwords entered through staff management must be at least 8 characters. Passwords are stored using Django's password hashing.</div></div>
+      <div class="security-note"><i data-lucide="user-round-check"></i><div><strong>Admin account protection</strong><br>The system prevents an administrator from removing their own admin access and protects the last active administrator.</div></div>
+      <div class="security-note"><i data-lucide="badge-check"></i><div><strong>Role-based permissions</strong><br>System pages enforce role checks on the server, not just by hiding navigation links.</div></div>
+    </div>
+  </section>
+  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;"><a class="btn-ghost" href="{% url 'hospital_settings' %}"><i data-lucide="arrow-left"></i> Back to general settings</a><a class="btn-sm btn-primary" href="{% url 'user_list' %}"><i data-lucide="settings-2"></i> Open account management</a></div>
+</div>
+{% endblock %}
