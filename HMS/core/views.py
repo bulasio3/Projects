@@ -289,3 +289,15 @@ def user_edit(request, pk):
         'form': form, 'account': account,
         'page_title': f'Edit Account: {account.username}', 'active_nav': 'users',
     })
+
+
+# --- DOCTOR DIRECTORY ---
+@login_required
+@role_required(['admin', 'doctor'])
+def doctor_list(request):
+    doctors = Doctor.objects.select_related('user', 'department').order_by('user__last_name', 'user__first_name')
+    return render(request, 'doctors/list.html', {
+        'doctors': doctors,
+        'page_title': 'Doctor Directory',
+        'active_nav': 'doctors',
+    })
