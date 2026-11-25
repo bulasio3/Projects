@@ -10,7 +10,7 @@ urlpatterns = [
     path('users/', views.user_list, name='user_list'),
     path('doctors/', views.doctor_list, name='doctor_list'),
     path('settings/', views.hospital_settings, name='hospital_settings'),
-    path('settings/security-access/', views.security_access, name='security_access'),
+    path('settings/security-access/', views.security_access, name='security_access'),\n    path('settings/system-preferences/', views.system_preferences, name='system_preferences'),
     path('users/new/', views.user_create, name='user_create'),
     path('users/<int:pk>/edit/', views.user_edit, name='user_edit'),
 
