@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}{{ page_title }} — MediCare{% endblock %}
+
+{% block content %}
+<section class="dashboard-intro">
+  <div>
+    <span class="eyebrow">BILLING & FINANCE</span>
+    <h2>Create an invoice</h2>
+    <p>Generate a patient invoice using the hospital's configured currency.</p>
+  </div>
+  <div class="intro-mark"><i data-lucide="receipt-text"></i></div>
+</section>
+
+<div class="panel" style="max-width:760px;">
+  <div class="panel-head">
+    <h2><i data-lucide="file-plus-2" class="head-icon"></i> Invoice details</h2>
+    <a href="{% url 'invoice_list' %}" class="btn-ghost"><i data-lucide="arrow-left"></i> Back to billing</a>
+  </div>
+  <div style="padding:0 0 18px;color:#6b7a8f;font-size:13px;">
+    Amounts are recorded as entered. Current display currency: <strong>{{ currency_code }}</strong>.
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <div style="display:flex;gap:10px;margin-top:20px;align-items:center;">
+      <button class="btn-sm btn-success" type="submit"><i data-lucide="save"></i> Create invoice</button>
+      <a href="{% url 'invoice_list' %}" class="btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
