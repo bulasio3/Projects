@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
 from .models import *
-from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm
+from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm, AppointmentConfigurationForm
 from django.core.exceptions import PermissionDenied
 from functools import wraps
 
@@ -307,9 +307,17 @@ def doctor_list(request):
 @role_required(['admin'])
 def hospital_settings(request):
     profile, _ = HospitalSettings.objects.get_or_create(pk=1)
+    appointment_config, _ = AppointmentConfiguration.objects.get_or_create(pk=1)
 
     if request.method == 'POST':
         action = request.POST.get('action')
+        if action == 'save_appointment_config':
+            appointment_form = AppointmentConfigurationForm(request.POST, instance=appointment_config)
+            if appointment_form.is_valid():
+                appointment_form.save()
+                messages.success(request, 'Appointment configuration saved successfully.')
+                return redirect('hospital_settings')
+            messages.error(request, 'Please review the appointment configuration fields.')
         if action == 'save_profile':
             profile_form = HospitalSettingsForm(request.POST, instance=profile)
             if profile_form.is_valid():
@@ -339,12 +347,16 @@ def hospital_settings(request):
             return redirect('hospital_settings')
     if request.method != 'POST' or request.POST.get('action') != 'save_profile':
         profile_form = HospitalSettingsForm(instance=profile)
+    if request.method != 'POST' or request.POST.get('action') != 'save_appointment_config':
+        appointment_form = AppointmentConfigurationForm(instance=appointment_config)
 
     return render(request, 'settings/index.html', {
         'departments': Department.objects.order_by('name'),
         'doctor_count': Doctor.objects.count(),
         'profile': profile,
         'profile_form': profile_form,
+        'appointment_config': appointment_config,
+        'appointment_form': appointment_form,
         'page_title': 'Hospital Settings',
         'active_nav': 'settings',
     })
