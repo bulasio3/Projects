@@ -230,3 +230,24 @@ class AppointmentConfiguration(models.Model):
 
     def __str__(self):
         return 'Hospital appointment configuration'
+
+
+class NotificationSettings(models.Model):
+    """Single-row notification preferences for hospital operations."""
+    REMINDER_CHOICES = [(1, '1 hour before'), (2, '2 hours before'), (24, '24 hours before'), (48, '48 hours before')]
+
+    appointment_reminders = models.BooleanField(default=True)
+    payment_alerts = models.BooleanField(default=True)
+    lab_result_alerts = models.BooleanField(default=True)
+    low_stock_alerts = models.BooleanField(default=True)
+    email_notifications = models.BooleanField(default=True)
+    sms_notifications = models.BooleanField(default=False)
+    reminder_hours_before = models.PositiveSmallIntegerField(choices=REMINDER_CHOICES, default=24)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return 'Hospital notification preferences'
