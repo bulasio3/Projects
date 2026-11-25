@@ -5,7 +5,7 @@
   <div>
     <span class="eyebrow">CLINICAL TEAM</span>
     <h2>Doctor directory</h2>
-    <p>View the hospital's registered doctors, specialties and availability.</p>
+    <p>Find doctors, their contact details, specialties and clinical availability.</p>
   </div>
   <div class="intro-mark"><i data-lucide="stethoscope"></i></div>
 </section>
@@ -19,18 +19,20 @@
   </div>
   <div class="table-scroll">
     <table class="doctors-table">
-      <thead><tr><th>Doctor</th><th>Specialization</th><th>Department</th><th>Consultation fee</th><th>Availability</th></tr></thead>
+      <thead><tr><th>Doctor</th><th>Email address</th><th>Phone number</th><th>Specialization</th><th>Department</th><th>Consultation fee</th><th>Availability</th></tr></thead>
       <tbody>
         {% for doctor in doctors %}
         <tr>
-          <td><div class="doctor-identity"><span class="doctor-avatar"><i data-lucide="user-round"></i></span><div><strong>Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}</strong><small>{{ doctor.user.email|default:"Email not provided" }}</small></div></div></td>
+          <td><div class="doctor-identity"><span class="doctor-avatar"><i data-lucide="user-round"></i></span><div><strong>Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}</strong><small>Medical practitioner</small></div></div></td>
+          <td>{{ doctor.user.email|default:"Not provided" }}</td>
+          <td>{{ doctor.user.phone|default:"Not provided" }}</td>
           <td>{{ doctor.specialization|default:"Not specified" }}</td>
           <td>{{ doctor.department.name|default:"Unassigned" }}</td>
           <td>UGX {{ doctor.consultation_fee|floatformat:0 }}</td>
           <td>{% if doctor.is_available %}<span class="pill green">Available</span>{% else %}<span class="pill orange">Unavailable</span>{% endif %}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="empty-state"><i data-lucide="stethoscope"></i><strong>No doctor profiles found</strong><span>Doctor profiles will appear here once registered.</span></td></tr>
+        <tr><td colspan="7" class="empty-state"><i data-lucide="stethoscope"></i><strong>No doctor profiles found</strong><span>Doctor profiles will appear here once registered.</span></td></tr>
         {% endfor %}
       </tbody>
     </table>
