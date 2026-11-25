@@ -540,3 +540,20 @@ tr:hover td { background:#f9fbfd; }
 @media(max-width:1180px){.doctor-workspace-header{flex-direction:column}.doctor-header-actions{justify-content:flex-start;width:100%}.doctor-clinical-layout{grid-template-columns:minmax(0,1fr)}.doctor-right-column{grid-template-columns:repeat(2,minmax(0,1fr))}.doctor-inbox-panel{grid-column:1/-1}}
 @media(max-width:850px){.doctor-kpi-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.doctor-workspace-header{padding:17px}.doctor-header-actions{align-items:stretch}.doctor-global-search{min-width:100%;width:100%}.doctor-create-action,.doctor-profile-chip{justify-content:center;flex:1}.doctor-right-column{grid-template-columns:1fr}.doctor-inbox-panel{grid-column:auto}.doctor-workspace-tab{padding:11px 8px;font-size:10px}.doctor-search-result{flex-wrap:wrap}.doctor-search-meta{margin-left:46px}.doctor-search-result .doctor-row-link{margin-left:auto}}
+
+
+/* Doctor dashboard: completed appointment list */
+.doctor-completed-section { border-top:1px solid #e8edf2; padding:20px 22px 22px; }
+.doctor-completed-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.doctor-completed-heading h3 { color:#20364b; font-size:16px; margin-top:3px; }
+.doctor-completed-list { display:grid; gap:8px; }
+.doctor-completed-item { display:grid; grid-template-columns:76px minmax(0,1fr) auto auto; align-items:center; gap:14px; padding:12px 14px; border:1px solid #e8edf2; border-radius:10px; color:inherit; text-decoration:none; background:#fff; }
+.doctor-completed-item:hover { border-color:#b8deda; background:#fbfefe; }
+.doctor-completed-time { color:#52677b; font-size:13px; font-weight:700; }
+.doctor-completed-patient { min-width:0; display:grid; gap:3px; }
+.doctor-completed-patient strong { color:#20364b; font-size:13px; }
+.doctor-completed-patient small { color:#718096; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@media (max-width:700px) {
+  .doctor-completed-item { grid-template-columns:58px minmax(0,1fr); }
+  .doctor-completed-item .doctor-status-pill, .doctor-completed-item .doctor-row-link { grid-column:2; justify-self:start; }
+}
