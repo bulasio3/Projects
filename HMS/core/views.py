@@ -308,7 +308,7 @@ def doctor_list(request):
 def hospital_settings(request):
     profile, _ = HospitalSettings.objects.get_or_create(pk=1)
     appointment_config, _ = AppointmentConfiguration.objects.get_or_create(pk=1)
-    notification_settings, _ = NotificationSettings.objects.get_or_create(pk=1)\n    system_preferences, _ = SystemPreferences.objects.get_or_create(pk=1)
+    notification_settings, _ = NotificationSettings.objects.get_or_create(pk=1)
 
     if request.method == 'POST':
         action = request.POST.get('action')
