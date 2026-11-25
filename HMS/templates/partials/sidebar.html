@@ -59,7 +59,7 @@
       <a href="{% url 'user_list' %}" class="{% if active_nav == 'users' %}active{% endif %}">
         <i data-lucide="user-cog"></i><span>Users & Roles</span>
       </a>
-      <a href="#" class="{% if active_nav == 'settings' %}active{% endif %}">
+      <a href="{% url 'hospital_settings' %}" class="{% if active_nav == 'settings' %}active{% endif %}">
         <i data-lucide="settings"></i><span>Settings</span>
       </a>
     {% endif %}
