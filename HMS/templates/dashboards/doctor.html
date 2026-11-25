@@ -10,7 +10,7 @@
       <p>{{ doctor_profile.specialization|default:"Medical practitioner" }}{% if doctor_profile.department %} · {{ doctor_profile.department.name }}{% endif %} · {{ today|date:system_date_format }}</p>
     </div>
     <div class="doctor-header-actions">
-      <form method="get" action="{% url 'dashboard' %}" class="doctor-global-search">
+      <form method="get" action="{% url 'dashboard' %}" id="doctor-patient-search" class="doctor-global-search">
         <i data-lucide="search"></i>
         <input type="search" name="q" value="{{ patient_search }}" placeholder="Search my patients by name, MRN or phone" aria-label="Search assigned patients">
         <button type="submit">Search</button>
@@ -180,6 +180,10 @@ document.addEventListener('DOMContentLoaded', function () {
     outpatient: document.getElementById('doctor-outpatient-panel'),
     inpatient: document.getElementById('doctor-inpatient-panel')
   };
+  if (window.location.hash === '#doctor-inpatient-tab') {
+    const inpatientTab = document.getElementById('doctor-inpatient-tab');
+    if (inpatientTab) inpatientTab.click();
+  }
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function () {
       const selected = tab.dataset.doctorTab;
