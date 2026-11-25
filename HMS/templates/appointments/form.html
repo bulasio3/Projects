@@ -1,19 +1,39 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 {% block title %}{{ page_title }} — MediCare{% endblock %}
-
 {% block content %}
-<div class="panel" style="max-width:700px;">
-  <div class="panel-head">
-    <h2><i data-lucide="calendar-plus" class="head-icon"></i> {{ page_title }}</h2>
-    <a href="{% url 'appointment_list' %}" class="btn-ghost"><i data-lucide="arrow-left"></i> Back</a>
-  </div>
-  <form method="post">
+<div class="form-page">
+  <section class="form-hero">
+    <div><span class="eyebrow">CLINICAL SCHEDULING</span><h2>{{ page_title }}</h2><p>Schedule a consultation by selecting a registered patient, an available doctor, and the appointment date and time.</p></div>
+    <div class="form-hero-icon"><i data-lucide="calendar-clock"></i></div>
+  </section>
+  <form method="post" class="form-shell">
     {% csrf_token %}
-    {{ form|crispy }}
-    <div style="margin-top:20px;">
-      <button class="btn-sm btn-success" type="submit"><i data-lucide="save"></i> Book</button>
-    </div>
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    <section class="form-section">
+      <div class="form-section-heading"><span class="form-section-icon"><i data-lucide="users-round"></i></span><div><h3>Appointment participants</h3><p>Link this appointment to the correct patient and doctor profile.</p></div></div>
+      <div class="form-grid">
+        {% for field in form %}{% if field.name == 'patient' or field.name == 'doctor' %}
+        <div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}<span class="required">*</span></label>{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</div>
+        {% endif %}{% endfor %}
+      </div>
+    </section>
+    <section class="form-section">
+      <div class="form-section-heading"><span class="form-section-icon"><i data-lucide="calendar-days"></i></span><div><h3>Date and time</h3><p>Choose when the patient should attend the consultation.</p></div></div>
+      <div class="form-grid">
+        {% for field in form %}{% if field.name == 'date' or field.name == 'time' %}
+        <div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}<span class="required">*</span></label>{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</div>
+        {% endif %}{% endfor %}
+      </div>
+    </section>
+    <section class="form-section">
+      <div class="form-section-heading"><span class="form-section-icon"><i data-lucide="clipboard-list"></i></span><div><h3>Consultation information</h3><p>Optional details to help the clinical team prepare.</p></div></div>
+      <div class="form-grid">
+        {% for field in form %}{% if field.name == 'reason' or field.name == 'notes' %}
+        <div class="form-field wide"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</div>
+        {% endif %}{% endfor %}
+      </div>
+    </section>
+    <div class="form-actions"><span class="form-actions-note"><i data-lucide="asterisk"></i> Fields marked * are required.</span><div style="display:flex;gap:9px;flex-wrap:wrap;"><a class="form-cancel" href="{% url 'appointment_list' %}">Cancel</a><button class="form-submit" type="submit"><i data-lucide="calendar-check"></i> Book appointment</button></div></div>
   </form>
 </div>
 {% endblock %}
