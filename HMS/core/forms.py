@@ -38,7 +38,8 @@ class StaffUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk and self.instance.role == 'doctor':
-            profile = getattr(self.instance, 'doctor', None)
+            from .models import Doctor
+            profile = Doctor.objects.filter(user=self.instance).first()
             if profile:
                 self.fields['specialization'].initial = profile.specialization
                 self.fields['department'].initial = profile.department_id
