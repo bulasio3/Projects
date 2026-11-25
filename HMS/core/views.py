@@ -308,11 +308,11 @@ def doctor_list(request):
 def hospital_settings(request):
     profile, _ = HospitalSettings.objects.get_or_create(pk=1)
     appointment_config, _ = AppointmentConfiguration.objects.get_or_create(pk=1)
-    notification_settings, _ = NotificationSettings.objects.get_or_create(pk=1)
+    notification_settings, _ = NotificationSettings.objects.get_or_create(pk=1)\n    system_preferences, _ = SystemPreferences.objects.get_or_create(pk=1)
 
     if request.method == 'POST':
         action = request.POST.get('action')
-        if action == 'save_notifications':
+        if action == 'save_system_preferences':\n            preferences_form = SystemPreferencesForm(request.POST, instance=system_preferences)\n            if preferences_form.is_valid():\n                preferences_form.save()\n                messages.success(request, 'System preferences saved successfully.')\n                return redirect('system_preferences')\n            messages.error(request, 'Please review the system preference fields.')\n        if action == 'save_notifications':
             notification_form = NotificationSettingsForm(request.POST, instance=notification_settings)
             if notification_form.is_valid():
                 notification_form.save()
@@ -441,3 +441,25 @@ def security_access(request):
         'role_choices': [(value, label) for value, label in User.ROLE_CHOICES if value != 'patient'],
     }
     return render(request, 'settings/security_access.html', context)
+
+
+@login_required
+@role_required(['admin'])
+def system_preferences(request):
+    preferences, _ = SystemPreferences.objects.get_or_create(pk=1)
+    if request.method == 'POST' and request.POST.get('action') == 'save_system_preferences':
+        preferences_form = SystemPreferencesForm(request.POST, instance=preferences)
+        if preferences_form.is_valid():
+            preferences_form.save()
+            messages.success(request, 'System preferences saved successfully.')
+            return redirect('system_preferences')
+        messages.error(request, 'Please review the highlighted system preference fields.')
+    else:
+        preferences_form = SystemPreferencesForm(instance=preferences)
+
+    return render(request, 'settings/system_preferences.html', {
+        'page_title': 'System Preferences',
+        'active_nav': 'settings',
+        'preferences': preferences,
+        'preferences_form': preferences_form,
+    })
