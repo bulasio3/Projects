@@ -301,3 +301,31 @@ def doctor_list(request):
         'page_title': 'Doctor Directory',
         'active_nav': 'doctors',
     })
+
+
+@login_required
+@role_required(['admin'])
+def hospital_settings(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add_department':
+            name = request.POST.get('name', '').strip()
+            description = request.POST.get('description', '').strip()
+            if not name:
+                messages.error(request, 'Please enter a department name.')
+            elif Department.objects.filter(name__iexact=name).exists():
+                messages.error(request, 'A department with that name already exists.')
+            else:
+                Department.objects.create(name=name, description=description)
+                messages.success(request, f'{name} department added successfully.')
+            return redirect('hospital_settings')
+        if action == 'delete_department':
+            department = get_object_or_404(Department, pk=request.POST.get('department_id'))
+            if Doctor.objects.filter(department=department).exists():
+                messages.error(request, 'This department is assigned to a doctor and cannot be deleted yet.')
+            else:
+                department_name = department.name
+                department.delete()
+                messages.success(request, f'{department_name} department deleted.')
+            return redirect('hospital_settings')
+    return render(request, 'settings/index.html', {'departments': Department.objects.order_by('name'), 'doctor_count': Doctor.objects.count(), 'page_title': 'Hospital Settings', 'active_nav': 'settings'})
