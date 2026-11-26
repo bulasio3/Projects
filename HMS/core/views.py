@@ -159,10 +159,46 @@ def dashboard(request):
     elif role == 'patient':
         patient = getattr(request.user, 'patient', None)
         if patient:
+            patient_appointments = Appointment.objects.filter(
+                patient=patient
+            ).select_related('doctor__user', 'doctor__department').order_by('-date', '-time')
+            ready_results = LabTest.objects.filter(
+                patient=patient, status='ready'
+            ).select_related('doctor__user').order_by('-completed_at', '-created_at')
+            patient_records = MedicalRecord.objects.filter(
+                patient=patient
+            ).select_related('doctor__user').order_by('-created_at')
+            patient_invoices = Invoice.objects.filter(
+                patient=patient
+            ).order_by('-created_at')
             ctx.update({
                 'patient': patient,
-                'appointments': Appointment.objects.filter(patient=patient, date__gte=today).order_by('date')[:4],
-                'recent_results': LabTest.objects.filter(patient=patient, status='ready')[:4],
+                'appointments': patient_appointments.filter(
+                    date__gte=today
+                ).exclude(status__in=['cancelled', 'no_show'])[:5],
+                'appointment_history': patient_appointments[:8],
+                'recent_results': ready_results[:5],
+                'ready_result_count': ready_results.count(),
+                'medical_records': patient_records[:5],
+                'prescription_records': patient_records.exclude(prescription='')[:5],
+                'recent_invoices': patient_invoices[:5],
+                'unpaid_invoice_count': patient_invoices.filter(status='unpaid').count(),
+                'upcoming_appointment_count': patient_appointments.filter(
+                    date__gte=today
+                ).exclude(status__in=['cancelled', 'no_show', 'completed']).count(),
+            })
+        else:
+            ctx.update({
+                'patient': None,
+                'appointments': Appointment.objects.none(),
+                'appointment_history': Appointment.objects.none(),
+                'recent_results': LabTest.objects.none(),
+                'ready_result_count': 0,
+                'medical_records': MedicalRecord.objects.none(),
+                'prescription_records': MedicalRecord.objects.none(),
+                'recent_invoices': Invoice.objects.none(),
+                'unpaid_invoice_count': 0,
+                'upcoming_appointment_count': 0,
             })
     elif role == 'pharmacist':
         ctx.update({'medicines': Medicine.objects.order_by('name'), 'low_stock': Medicine.objects.filter(stock__lt=20)})
