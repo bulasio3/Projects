@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
 from .models import *
-from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm, AppointmentConfigurationForm, NotificationSettingsForm, SystemPreferencesForm, InvoiceForm
+from .forms import PatientForm, AppointmentForm, StaffUserForm, HospitalSettingsForm, AppointmentConfigurationForm, NotificationSettingsForm, SystemPreferencesForm, InvoiceForm, CallLogForm, CallbackRequestForm
 from django.core.exceptions import PermissionDenied
 from functools import wraps
 
@@ -300,6 +300,38 @@ def call_center(request):
         'page_title': 'Call Center', 'active_nav': 'calls',
         'calls': CallLog.objects.select_related('patient').order_by('-started_at')[:50],
         'callbacks': CallbackRequest.objects.filter(status='pending').select_related('patient'),
+    })
+
+@login_required
+@role_required(['admin', 'reception'])
+def call_log_create(request):
+    form = CallLogForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        call = form.save(commit=False)
+        call.caller = request.user
+        call.save()
+        messages.success(request, 'Call logged successfully.')
+        return redirect('call_center')
+    return render(request, 'dashboards/call_center.html', {
+        'page_title': 'Call Center', 'active_nav': 'calls',
+        'calls': CallLog.objects.select_related('patient').order_by('-started_at')[:50],
+        'callbacks': CallbackRequest.objects.filter(status='pending').select_related('patient'),
+        'call_form': form, 'callback_form': CallbackRequestForm(),
+    })
+
+@login_required
+@role_required(['admin', 'reception'])
+def callback_create(request):
+    form = CallbackRequestForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Callback request created.')
+        return redirect('call_center')
+    return render(request, 'dashboards/call_center.html', {
+        'page_title': 'Call Center', 'active_nav': 'calls',
+        'calls': CallLog.objects.select_related('patient').order_by('-started_at')[:50],
+        'callbacks': CallbackRequest.objects.filter(status='pending').select_related('patient'),
+        'call_form': CallLogForm(), 'callback_form': form,
     })
 
 @login_required
