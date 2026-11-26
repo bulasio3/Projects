@@ -25,6 +25,8 @@ urlpatterns = [
     path('appointments/<int:pk>/<str:status>/', views.appointment_update_status, name='appointment_status'),
 
     path('calls/', views.call_center, name='call_center'),
+    path('calls/log/', views.call_log_create, name='call_log_create'),
+    path('calls/callback/new/', views.callback_create, name='callback_create'),
     path('calls/callback/<int:pk>/done/', views.callback_done, name='callback_done'),
 
    path('pharmacy/', views.pharmacy_view, name='pharmacy_view'),
