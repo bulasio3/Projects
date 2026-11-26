@@ -67,7 +67,7 @@ def dashboard(request):
         checked_in_today = today_qs.filter(status='checked_in')
         with_doctor_today = today_qs.filter(status='in_progress')
         completed_today = today_qs.filter(status='completed')
-        callbacks = CallbackRequest.objects.filter(status='pending').select_related('patient').order_by('-created_at')
+        callbacks = CallbackRequest.objects.filter(status='pending').select_related('patient').order_by('-requested_at')
         kanban_columns = []
         for s, title in [('checked_in', 'Checked In'), ('in_progress', 'With Doctor'), ('completed', 'Completed')]:
             kanban_columns.append({'title': title, 'items': today_qs.filter(status=s)[:6]})
