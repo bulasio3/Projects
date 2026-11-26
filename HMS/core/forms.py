@@ -189,3 +189,26 @@ class SystemPreferencesForm(forms.ModelForm):
             'time_zone': forms.Select(),
             'time_format': forms.RadioSelect(),
         }
+
+class CallLogForm(forms.ModelForm):
+    class Meta:
+        from .models import CallLog
+        model = CallLog
+        fields = ['patient', 'status', 'reason', 'duration_sec']
+        widgets = {
+            'patient': forms.Select(attrs={'class': 'form-control', 'required': 'required'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'reason': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Reason for the call'}),
+            'duration_sec': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'placeholder': 'Duration in seconds'}),
+        }
+
+class CallbackRequestForm(forms.ModelForm):
+    class Meta:
+        from .models import CallbackRequest
+        model = CallbackRequest
+        fields = ['patient', 'phone', 'reason']
+        widgets = {
+            'patient': forms.Select(attrs={'class': 'form-control', 'required': 'required'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}),
+            'reason': forms.TextInput(attrs={'class': 'form-control', 'required': 'required', 'placeholder': 'Reason for follow-up'}),
+        }
