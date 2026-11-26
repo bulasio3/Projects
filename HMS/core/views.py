@@ -62,18 +62,26 @@ def dashboard(request):
             'recent_appointments': Appointment.objects.select_related('patient', 'doctor__user').order_by('-created_at')[:6],
         })
     elif role == 'reception':
+        today_qs = Appointment.objects.filter(date=today).select_related('patient', 'doctor__user').order_by('time')
+        active_today = today_qs.exclude(status__in=['completed', 'cancelled', 'no_show'])
+        checked_in_today = today_qs.filter(status='checked_in')
+        with_doctor_today = today_qs.filter(status='in_progress')
+        completed_today = today_qs.filter(status='completed')
+        callbacks = CallbackRequest.objects.filter(status='pending').select_related('patient').order_by('-created_at')
         kanban_columns = []
-        for s, title in [('checked_in', 'Checked In'), ('in_progress', 'With Doctor'), ('completed', 'Discharged')]:
-            kanban_columns.append({'title': title, 'items': Appointment.objects.filter(date=today, status=s).select_related('patient', 'doctor__user')[:6]})
+        for s, title in [('checked_in', 'Checked In'), ('in_progress', 'With Doctor'), ('completed', 'Completed')]:
+            kanban_columns.append({'title': title, 'items': today_qs.filter(status=s)[:6]})
         ctx.update({
-            'call_queue': [
-                {'patient_name': 'Ama Owusu', 'reason': 'Medical question', 'wait_time': '1m 42s'},
-                {'patient_name': 'John Mensah', 'reason': 'Billing query', 'wait_time': '0m 58s'},
-                {'patient_name': 'Kofi Asante', 'reason': 'Book appointment', 'wait_time': '0m 21s'},
-            ],
-            'doctors': Doctor.objects.select_related('user').all()[:6],
-            'today_appointments': Appointment.objects.filter(date=today).select_related('patient', 'doctor__user').order_by('time')[:10],
-            'callbacks': CallbackRequest.objects.filter(status='pending')[:6],
+            'today_appointments': today_qs[:12],
+            'today_appointment_count': today_qs.count(),
+            'checked_in_count': checked_in_today.count(),
+            'with_doctor_count': with_doctor_today.count(),
+            'completed_today_count': completed_today.count(),
+            'active_today': active_today[:8],
+            'callbacks': callbacks[:6],
+            'pending_callback_count': callbacks.count(),
+            'doctors': Doctor.objects.select_related('user', 'department').all()[:8],
+            'available_doctor_count': Doctor.objects.filter(is_available=True).count(),
             'kanban_columns': kanban_columns,
         })
     elif role == 'doctor':
