@@ -300,6 +300,7 @@ def call_center(request):
         'page_title': 'Call Center', 'active_nav': 'calls',
         'calls': CallLog.objects.select_related('patient').order_by('-started_at')[:50],
         'callbacks': CallbackRequest.objects.filter(status='pending').select_related('patient'),
+        'call_form': CallLogForm(), 'callback_form': CallbackRequestForm(),
     })
 
 @login_required
