@@ -1,75 +1,205 @@
 {% extends 'base.html' %}
-{% block title %}Patient Portal — MediCare{% endblock %}
+{% block title %}My Health Portal — MediCare{% endblock %}
 
 {% block content %}
+<style>
+.patient-portal{max-width:1420px;margin:0 auto;color:#29445d}
+.patient-welcome{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:23px 25px;background:#fff;border:1px solid #e5ebf1;border-radius:15px;margin:4px 0 18px}
+.patient-welcome-main{display:flex;align-items:center;gap:15px;min-width:0}
+.patient-avatar{width:52px;height:52px;display:grid;place-items:center;border-radius:15px;background:#eaf6f4;color:#0f766e;font-weight:800;font-size:17px;flex-shrink:0}
+.patient-welcome h2{margin:0 0 5px;color:#18324b;font-size:22px}
+.patient-welcome p{margin:0;color:#7a8a9b;font-size:12px}
+.patient-id{display:inline-flex;margin-top:8px;padding:5px 8px;border-radius:6px;background:#f1f5f8;color:#50677c;font-size:10px;font-weight:800;letter-spacing:.4px}
+.patient-contact{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:9px;background:#0f766e;color:white;text-decoration:none;font-size:11px;font-weight:750;white-space:nowrap;cursor:pointer}
+.patient-contact svg{width:15px;height:15px}
+.patient-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:18px}
+.patient-kpi{display:flex;align-items:center;gap:12px;min-width:0;padding:16px;background:#fff;border:1px solid #e5ebf1;border-radius:13px}
+.patient-kpi-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#edf7f6;color:#0f8178;flex-shrink:0}
+.patient-kpi-icon svg{width:19px;height:19px}
+.patient-kpi small{display:block;color:#7d8da0;font-size:10px;font-weight:700}
+.patient-kpi strong{display:block;margin-top:3px;color:#18324b;font-size:22px;font-variant-numeric:tabular-nums}
+.patient-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.85fr);gap:17px;align-items:start}
+.patient-main,.patient-aside{display:grid;gap:17px;min-width:0}
+.patient-panel{background:#fff;border:1px solid #e5ebf1;border-radius:13px;overflow:hidden;min-width:0}
+.patient-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid #edf1f5}
+.patient-panel-head h3{margin:0;color:#29445d;font-size:14px}
+.patient-panel-head a{color:#0f766e;font-size:10px;font-weight:750;text-decoration:none}
+.patient-list{padding:4px 18px}
+.patient-item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #edf1f5;min-width:0}
+.patient-item:last-child{border-bottom:0}
+.patient-date{width:43px;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:9px;background:#edf7f6;color:#0f766e;flex-shrink:0}
+.patient-date strong{font-size:16px;line-height:1.1}
+.patient-date small{font-size:9px;font-weight:800;text-transform:uppercase}
+.patient-item-info{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.patient-item-info strong{color:#29445d;font-size:11px;overflow-wrap:anywhere}
+.patient-item-info small{color:#8291a3;font-size:10px;line-height:1.4}
+.patient-status{display:inline-flex;padding:5px 7px;border-radius:6px;background:#eef4fa;color:#54718d;font-size:9px;font-weight:750;white-space:nowrap}
+.patient-status.ready,.patient-status.paid{background:#eaf7f0;color:#23815b}
+.patient-status.unpaid{background:#fff5e8;color:#a96b18}
+.patient-empty{padding:24px 15px;text-align:center;color:#8796a5;font-size:11px}
+.patient-empty svg{display:block;width:22px;height:22px;margin:0 auto 8px;color:#a0b0bd}
+.patient-quicklinks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:14px}
+.patient-quicklink{display:flex;align-items:center;gap:9px;padding:12px;border:1px solid #e5ebf1;border-radius:9px;color:#456177;text-decoration:none;font-size:10px;font-weight:750}
+.patient-quicklink:hover{border-color:#9edbd5;background:#f7fcfb}
+.patient-quicklink svg{width:16px;height:16px;color:#0f8178}
+.patient-profile{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.patient-profile div{min-width:0}
+.patient-profile small{display:block;margin-bottom:5px;color:#8796a5;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+.patient-profile strong{display:block;color:#40566d;font-size:11px;overflow-wrap:anywhere;font-weight:650}
+.patient-allergy{margin:0 18px 17px;padding:11px 12px;border-radius:8px;background:#fff3f0;color:#b84b42;font-size:11px;line-height:1.5}
+.patient-allergy strong{display:block;margin-bottom:3px;font-size:9px;text-transform:uppercase;letter-spacing:.4px}
+.patient-history{padding:4px 18px 12px}
+.patient-history-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #edf1f5;font-size:10px}
+.patient-history-row:last-child{border-bottom:0}
+.patient-history-row strong{color:#40566d}
+.patient-history-row span{color:#8291a3;text-align:right}
+@media(max-width:1050px){.patient-layout{grid-template-columns:1fr}}
+@media(max-width:720px){.patient-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.patient-welcome{align-items:flex-start;flex-direction:column}.patient-contact{width:100%;justify-content:center}}
+@media(max-width:430px){.patient-kpis{gap:8px}.patient-kpi{padding:11px;gap:8px}.patient-kpi-icon{width:32px;height:32px}.patient-kpi strong{font-size:18px}.patient-profile{grid-template-columns:1fr}.patient-item{align-items:flex-start;flex-wrap:wrap}.patient-item .patient-status{margin-left:55px}}
+</style>
+
+<div class="patient-portal">
 {% if not patient %}
-  <div class="panel" style="max-width:600px;text-align:center;">
-    <p style="color:#6b7a8f;padding:24px;">Your patient profile isn't linked yet. Please contact reception.</p>
-  </div>
+  <section class="patient-panel">
+    <div class="patient-empty" style="padding:42px 20px">
+      <i data-lucide="user-round"></i>
+      <strong style="display:block;color:#40566d;margin-bottom:6px">Your patient profile is not linked yet</strong>
+      Please contact the reception team so they can link your patient record to this login. Your health information will appear here once linked.
+    </div>
+  </section>
 {% else %}
-<div class="portal-wrap">
-  <div class="phone">
-    <div class="p-header">
-      <div class="avatar">{{ patient.initials }}</div>
+  <header class="patient-welcome">
+    <div class="patient-welcome-main">
+      <div class="patient-avatar">{{ patient.initials }}</div>
       <div>
-        <h2>{{ patient.full_name }}</h2>
-        <p>Patient ID: {{ patient.code }}</p>
+        <h2>Welcome, {{ patient.full_name }}</h2>
+        <p>Your personal health information and hospital visits in one place.</p>
+        <span class="patient-id">PATIENT ID · {{ patient.code }}</span>
       </div>
     </div>
+    <a href="javascript:void(0)" class="patient-contact" onclick="openCall()"><i data-lucide="phone"></i> Contact Reception</a>
+  </header>
 
-    <div class="p-actions">
-      <div class="p-action"><i data-lucide="calendar-plus"></i><span>Book</span></div>
-      <div class="p-action"><i data-lucide="pill"></i><span>Rx</span></div>
-      <div class="p-action"><i data-lucide="flask-conical"></i><span>Results</span></div>
-      <div class="p-action"><i data-lucide="credit-card"></i><span>Pay</span></div>
-    </div>
+  <section class="patient-kpis">
+    <div class="patient-kpi"><span class="patient-kpi-icon"><i data-lucide="calendar-days"></i></span><div><small>Upcoming visits</small><strong>{{ upcoming_appointment_count }}</strong></div></div>
+    <div class="patient-kpi"><span class="patient-kpi-icon"><i data-lucide="flask-conical"></i></span><div><small>Results available</small><strong>{{ ready_result_count }}</strong></div></div>
+    <div class="patient-kpi"><span class="patient-kpi-icon"><i data-lucide="receipt"></i></span><div><small>Unpaid invoices</small><strong>{{ unpaid_invoice_count }}</strong></div></div>
+    <div class="patient-kpi"><span class="patient-kpi-icon"><i data-lucide="file-heart"></i></span><div><small>Medical records</small><strong>{{ medical_records|length }}</strong></div></div>
+  </section>
 
-    <div style="padding:0 14px 14px;">
-      <div class="call-banner" onclick="openCall()">
-        <div class="ring"><i data-lucide="phone"></i></div>
-        <div class="txt">
-          <strong>Call Reception</strong>
-          <span>Tap to speak with our team</span>
+  <div class="patient-layout">
+    <div class="patient-main">
+      <section class="patient-panel" id="visits">
+        <div class="patient-panel-head"><h3><i data-lucide="calendar-check" style="width:16px;vertical-align:middle;margin-right:5px;color:#0f8178"></i> Upcoming appointments</h3><a href="#appointment-history">View history ↓</a></div>
+        <div class="patient-list">
+          {% for a in appointments %}
+          <div class="patient-item">
+            <div class="patient-date"><strong>{{ a.date|date:"d" }}</strong><small>{{ a.date|date:"M" }}</small></div>
+            <div class="patient-item-info">
+              <strong>Dr. {{ a.doctor.user.get_full_name|default:a.doctor.user.username }}</strong>
+              <small>{{ a.doctor.department|default:"General" }} · {{ a.date|date:system_date_format }} · {{ a.time|time:system_time_format }}</small>
+              {% if a.reason %}<small>{{ a.reason }}</small>{% endif %}
+            </div>
+            <span class="patient-status">{{ a.get_status_display }}</span>
+          </div>
+          {% empty %}
+          <div class="patient-empty"><i data-lucide="calendar-x"></i>No upcoming appointments are recorded.</div>
+          {% endfor %}
         </div>
-      </div>
-    </div>
+      </section>
 
-    <div class="p-section">
-      <h3>Upcoming Appointments</h3>
-      {% for a in appointments %}
-      <div class="p-card">
-        <div class="date-box"><div class="day">{{ a.date|date:"d" }}</div><div class="mon">{{ a.date|date:"M" }}</div></div>
-        <div class="det">
-          <strong>Dr. {{ a.doctor.user.get_full_name }}</strong>
-          <span>{{ a.doctor.department|default:"General" }} · {{ a.time|time:"H:i" }}</span>
+      <section class="patient-panel" id="results">
+        <div class="patient-panel-head"><h3><i data-lucide="flask-conical" style="width:16px;vertical-align:middle;margin-right:5px;color:#0f8178"></i> Laboratory results</h3><span style="font-size:10px;color:#8291a3">Ready results only</span></div>
+        <div class="patient-list">
+          {% for r in recent_results %}
+          <div class="patient-item">
+            <span class="patient-kpi-icon"><i data-lucide="file-check-2"></i></span>
+            <div class="patient-item-info"><strong>{{ r.test_name }}</strong><small>Completed {{ r.completed_at|date:system_date_format|default:r.created_at|date:system_date_format }}</small>{% if r.result %}<small>{{ r.result|truncatechars:180 }}</small>{% endif %}</div>
+            <span class="patient-status ready">Ready</span>
+          </div>
+          {% empty %}
+          <div class="patient-empty"><i data-lucide="flask-conical"></i>No laboratory results are available yet.</div>
+          {% endfor %}
         </div>
-      </div>
-      {% empty %}
-      <p style="color:#6b7a8f;font-size:13px;">No upcoming appointments.</p>
-      {% endfor %}
+      </section>
+
+      <section class="patient-panel" id="prescriptions">
+        <div class="patient-panel-head"><h3><i data-lucide="pill" style="width:16px;vertical-align:middle;margin-right:5px;color:#0f8178"></i> Prescriptions & care notes</h3></div>
+        <div class="patient-list">
+          {% for record in prescription_records %}
+          <div class="patient-item">
+            <span class="patient-kpi-icon"><i data-lucide="clipboard-list"></i></span>
+            <div class="patient-item-info"><strong>Dr. {{ record.doctor.user.get_full_name|default:record.doctor.user.username }} · {{ record.created_at|date:system_date_format }}</strong><small>{{ record.prescription|truncatechars:220 }}</small></div>
+          </div>
+          {% empty %}
+          <div class="patient-empty"><i data-lucide="pill"></i>No prescriptions have been recorded in your portal yet.</div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="patient-panel" id="billing">
+        <div class="patient-panel-head"><h3><i data-lucide="receipt" style="width:16px;vertical-align:middle;margin-right:5px;color:#0f8178"></i> Recent invoices</h3></div>
+        <div class="patient-list">
+          {% for invoice in recent_invoices %}
+          <div class="patient-item">
+            <span class="patient-kpi-icon"><i data-lucide="file-text"></i></span>
+            <div class="patient-item-info"><strong>Invoice #{{ invoice.id }}</strong><small>{{ invoice.created_at|date:system_date_format }} · {{ system_currency|default:"UGX" }} {{ invoice.total|floatformat:2 }}</small></div>
+            <span class="patient-status {{ invoice.status }}">{{ invoice.get_status_display }}</span>
+          </div>
+          {% empty %}
+          <div class="patient-empty"><i data-lucide="receipt"></i>No invoices are recorded.</div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="patient-panel" id="appointment-history">
+        <div class="patient-panel-head"><h3><i data-lucide="history" style="width:16px;vertical-align:middle;margin-right:5px;color:#0f8178"></i> Visit history</h3></div>
+        <div class="patient-history">
+          {% for a in appointment_history %}
+          <div class="patient-history-row"><strong>{{ a.date|date:system_date_format }} · {{ a.time|time:system_time_format }}</strong><span>{{ a.get_status_display }} · Dr. {{ a.doctor.user.get_full_name|default:a.doctor.user.username }}</span></div>
+          {% empty %}
+          <div class="patient-empty">Your visit history will appear here.</div>
+          {% endfor %}
+        </div>
+      </section>
     </div>
 
-    <div class="p-section">
-      <h3>Recent Results</h3>
-      {% for r in recent_results %}
-      <div class="p-card">
-        <div class="date-box" style="background:#e8f8f0;color:#27ae60;"><div class="day">✓</div><div class="mon">Ready</div></div>
-        <div class="det"><strong>{{ r.test_name }}</strong><span>{{ r.created_at|date:"M d" }}</span></div>
-      </div>
-      {% empty %}
-      <p style="color:#6b7a8f;font-size:13px;">No results yet.</p>
-      {% endfor %}
-    </div>
+    <aside class="patient-aside">
+      <section class="patient-panel">
+        <div class="patient-panel-head"><h3>My health profile</h3></div>
+        <div class="patient-profile">
+          <div><small>Date of birth</small><strong>{{ patient.dob|date:system_date_format|default:"Not provided" }}</strong></div>
+          <div><small>Age / Gender</small><strong>{{ patient.age }} · {{ patient.get_gender_display }}</strong></div>
+          <div><small>Blood group</small><strong>{{ patient.blood_group|default:"Not recorded" }}</strong></div>
+          <div><small>Phone</small><strong>{{ patient.phone|default:"Not provided" }}</strong></div>
+          <div><small>Email</small><strong>{{ patient.email|default:"Not provided" }}</strong></div>
+          <div><small>Emergency contact</small><strong>{{ patient.emergency_contact|default:"Not provided" }}</strong></div>
+        </div>
+        {% if patient.allergies %}<div class="patient-allergy"><strong><i data-lucide="alert-triangle" style="width:12px;vertical-align:middle"></i> Recorded allergies</strong>{{ patient.allergies }}</div>{% endif %}
+      </section>
 
-    <div class="p-bottom">
-      <a href="#" class="active"><i data-lucide="home"></i><span>Home</span></a>
-      <a href="#"><i data-lucide="calendar"></i><span>Visits</span></a>
-      <a href="#"><i data-lucide="message-circle"></i><span>Chat</span></a>
-      <a href="#"><i data-lucide="user"></i><span>Profile</span></a>
-    </div>
+      <section class="patient-panel">
+        <div class="patient-panel-head"><h3>Quick navigation</h3></div>
+        <div class="patient-quicklinks">
+          <a class="patient-quicklink" href="#visits"><i data-lucide="calendar"></i> Appointments</a>
+          <a class="patient-quicklink" href="#results"><i data-lucide="flask-conical"></i> Test results</a>
+          <a class="patient-quicklink" href="#prescriptions"><i data-lucide="pill"></i> Prescriptions</a>
+          <a class="patient-quicklink" href="#billing"><i data-lucide="wallet"></i> Billing</a>
+          <a class="patient-quicklink" href="#appointment-history"><i data-lucide="history"></i> Visit history</a>
+        </div>
+      </section>
+
+      <section class="patient-panel">
+        <div class="patient-panel-head"><h3>Need assistance?</h3></div>
+        <div style="padding:16px 18px;color:#718196;font-size:11px;line-height:1.7">
+          To request a new appointment, update your personal details, or ask about a bill, contact the reception team.
+          <button type="button" onclick="openCall()" style="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:13px;padding:10px;border:0;border-radius:8px;background:#eaf6f4;color:#0f766e;font-weight:750;cursor:pointer"><i data-lucide="phone" style="width:15px"></i> Contact reception</button>
+        </div>
+      </section>
+    </aside>
   </div>
-</div>
 {% endif %}
+</div>
 {% endblock %}
 
 {% block modals %}{% if patient %}{% include 'partials/call_modal.html' %}{% endif %}{% endblock %}
