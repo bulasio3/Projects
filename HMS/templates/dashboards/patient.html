@@ -84,7 +84,7 @@
     <div class="patient-kpi"><span class="patient-kpi-icon"><i data-lucide="calendar-days"></i></span><div><small>Upcoming visits</small><strong>{{ upcoming_appointment_count }}</strong></div></div>
     <div class="patient-kpi"><span class="patient-kpi-icon"><i data-lucide="flask-conical"></i></span><div><small>Results available</small><strong>{{ ready_result_count }}</strong></div></div>
     <div class="patient-kpi"><span class="patient-kpi-icon"><i data-lucide="receipt"></i></span><div><small>Unpaid invoices</small><strong>{{ unpaid_invoice_count }}</strong></div></div>
-    <div class="patient-kpi"><span class="patient-kpi-icon"><i data-lucide="file-heart"></i></span><div><small>Medical records</small><strong>{{ medical_records|length }}</strong></div></div>
+    <div class="patient-kpi"><span class="patient-kpi-icon"><i data-lucide="file-heart"></i></span><div><small>Medical records</small><strong>{{ medical_record_count }}</strong></div></div>
   </section>
 
   <div class="patient-layout">
@@ -114,7 +114,7 @@
           {% for r in recent_results %}
           <div class="patient-item">
             <span class="patient-kpi-icon"><i data-lucide="file-check-2"></i></span>
-            <div class="patient-item-info"><strong>{{ r.test_name }}</strong><small>Completed {{ r.completed_at|date:system_date_format|default:r.created_at|date:system_date_format }}</small>{% if r.result %}<small>{{ r.result|truncatechars:180 }}</small>{% endif %}</div>
+            <div class="patient-item-info"><strong>{{ r.test_name }}</strong><small>Completed {% if r.completed_at %}{{ r.completed_at|date:system_date_format }}{% else %}{{ r.created_at|date:system_date_format }}{% endif %}</small>{% if r.result %}<small>{{ r.result|truncatechars:180 }}</small>{% endif %}</div>
             <span class="patient-status ready">Ready</span>
           </div>
           {% empty %}
