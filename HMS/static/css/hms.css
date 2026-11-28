@@ -557,3 +557,63 @@ tr:hover td { background:#f9fbfd; }
   .doctor-completed-item { grid-template-columns:58px minmax(0,1fr); }
   .doctor-completed-item .doctor-status-pill, .doctor-completed-item .doctor-row-link { grid-column:2; justify-self:start; }
 }
+
+/* ============ RECEPTION CALL CENTER ============ */
+.call-center-page{max-width:1600px;margin:0 auto;color:#20364b}
+.call-center-hero{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 26px;margin:0 0 18px;border:1px solid #e3edf1;border-radius:15px;background:linear-gradient(110deg,#fff 0%,#f0fbfa 100%)}
+.call-center-hero-copy{min-width:0}
+.call-center-eyebrow{display:block;margin-bottom:5px;color:#159b9b;font-size:10px;font-weight:800;letter-spacing:1.2px}
+.call-center-hero h2{margin:0 0 6px;color:#1e3a5f;font-size:24px;font-weight:750}
+.call-center-hero p{margin:0;color:#718096;font-size:13px;line-height:1.55}
+.call-center-hero-badge{display:flex;align-items:center;gap:9px;padding:12px 15px;border:1px solid #dcefeb;border-radius:12px;background:#fff;color:#0f766e;font-size:12px;font-weight:750;white-space:nowrap}
+.call-center-hero-badge svg{width:20px;height:20px}
+.call-center-entry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:18px;align-items:start}
+.call-center-panel{min-width:0;overflow:hidden;border:1px solid #e5ebf1;border-radius:14px;background:#fff;box-shadow:0 3px 14px rgba(28,53,82,.045)}
+.call-center-form-panel{padding:20px 22px}
+.call-center-panel-heading{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid #edf1f5}
+.call-center-panel-heading h3,.call-center-panel-title h3{margin:0;color:#20364b;font-size:16px;font-weight:750}
+.call-center-panel-heading p{margin:4px 0 0;color:#8190a2;font-size:11px;line-height:1.5}
+.call-center-icon{display:grid;place-items:center;width:39px;height:39px;flex-shrink:0;border-radius:11px}
+.call-center-icon svg{width:19px;height:19px}
+.call-center-icon-blue{background:#eaf3fb;color:#3d78ad}
+.call-center-icon-teal{background:#e7f6f4;color:#0f8b83}
+.call-center-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 14px;padding-top:17px}
+.call-center-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.call-center-field label{color:#53677c;font-size:11px;font-weight:750}
+.call-center-field label span{color:#d45a50}
+.call-center-field input:not([type=checkbox]),.call-center-field select,.call-center-field textarea{width:100%;min-width:0;min-height:42px;padding:10px 11px;border:1px solid #dce4ec;border-radius:8px;background:#fff;color:#29445d;font:inherit;font-size:12px;outline:none;transition:border-color .15s,box-shadow .15s}
+.call-center-field input:focus,.call-center-field select:focus,.call-center-field textarea:focus{border-color:#159b9b;box-shadow:0 0 0 3px rgba(21,155,155,.11)}
+.call-center-field small{color:#8795a5;font-size:10px;line-height:1.4}
+.call-center-field .call-center-error{color:#bf3f37}
+.call-center-errors{grid-column:1/-1;padding:10px 12px;border:1px solid #f3d5d1;border-radius:8px;background:#fff4f2;color:#bf3f37;font-size:11px}
+.call-center-submit{grid-column:1/-1;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;margin-top:2px;padding:10px 15px;border:0;border-radius:9px;background:#159b9b;color:#fff;font-size:12px;font-weight:750;cursor:pointer;transition:background .15s,transform .15s}
+.call-center-submit:hover{background:#117f82;transform:translateY(-1px)}
+.call-center-submit svg{width:16px;height:16px}
+.call-center-record-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,1fr);gap:18px;align-items:start}
+.call-center-panel-title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:19px 20px 15px;border-bottom:1px solid #edf1f5}
+.call-center-panel-title .call-center-eyebrow{margin-bottom:4px;font-size:9px}
+.call-center-count{padding:5px 9px;border-radius:20px;background:#edf8f7;color:#168b8c;font-size:10px;font-weight:750;white-space:nowrap}
+.call-center-table-wrap{width:100%;overflow-x:auto}
+.call-center-table{width:100%;border-collapse:collapse;font-size:12px}
+.call-center-table th{padding:11px 12px;background:#f8fafc;color:#8491a2;font-size:9px;font-weight:800;letter-spacing:.55px;text-align:left;text-transform:uppercase;white-space:nowrap}
+.call-center-table td{padding:13px 12px;border-bottom:1px solid #edf1f5;color:#607286;font-size:11px;vertical-align:middle}
+.call-center-table tbody tr:last-child td{border-bottom:0}
+.call-center-table td strong{color:#29445d;font-size:11px}
+.call-center-callback-list{padding:3px 18px 10px}
+.call-center-callback{display:flex;align-items:center;gap:11px;padding:13px 0;border-bottom:1px solid #edf1f5;min-width:0}
+.call-center-callback:last-child{border-bottom:0}
+.call-center-callback-avatar{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:50%;background:#eaf4f4;color:#0f766e;font-size:10px;font-weight:800}
+.call-center-callback-info{display:flex;flex:1;flex-direction:column;gap:3px;min-width:0}
+.call-center-callback-info strong{overflow:hidden;color:#29445d;font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+.call-center-callback-info span,.call-center-callback-info small{overflow-wrap:anywhere;color:#8190a2;font-size:10px;line-height:1.4}
+.call-center-callback-info small{color:#607286}
+.call-center-done{display:inline-flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #d9eee4;border-radius:8px;background:#eff9f3;color:#23815b;font-size:10px;font-weight:750;cursor:pointer;white-space:nowrap}
+.call-center-done:hover{background:#e1f4e9}
+.call-center-done svg{width:13px;height:13px}
+.call-center-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:155px;padding:24px 14px;text-align:center;color:#8291a3}
+.call-center-empty>span{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:#edf7f6;color:#0f8178}
+.call-center-empty svg{width:19px;height:19px}
+.call-center-empty strong{color:#40566d;font-size:12px}
+.call-center-empty small{font-size:10px;line-height:1.5}
+@media(max-width:1100px){.call-center-record-grid{grid-template-columns:1fr}.call-center-entry-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.call-center-hero{align-items:flex-start;padding:18px;flex-direction:column}.call-center-hero h2{font-size:21px}.call-center-form-panel{padding:17px}.call-center-form{grid-template-columns:1fr}.call-center-field,.call-center-submit,.call-center-errors{grid-column:1}.call-center-panel-title{padding:16px}.call-center-callback-list{padding:3px 13px 8px}.call-center-done span{display:none}}
