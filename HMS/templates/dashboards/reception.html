@@ -1,67 +1,65 @@
 {% extends 'base.html' %}
 {% block title %}Receptionist Dashboard — MediCare{% endblock %}
-
 {% block content %}
+<style>
+.reception-hero{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:24px 26px;margin-bottom:20px;border:1px solid #e3edf1;border-radius:16px;background:linear-gradient(110deg,#fff,#f1fbfa)}
+.reception-hero h2{font-size:23px;color:#1e3a5f;margin:4px 0 6px}.reception-hero p{color:#718096;font-size:13px}.reception-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.3px;color:#159b9b}
+.reception-actions{display:flex;gap:10px;flex-wrap:wrap}.reception-actions a,.reception-link{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;border-radius:9px;text-decoration:none;font-size:13px;font-weight:700}
+.reception-primary{background:#159b9b;color:white}.reception-secondary{background:#fff;border:1px solid #dce5eb;color:#1e3a5f}
+.reception-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:20px}.reception-stat{background:#fff;border:1px solid #e8edf3;border-radius:13px;padding:18px}.reception-stat label{display:block;color:#718096;font-size:12px;margin-bottom:10px}.reception-stat strong{font-size:27px;color:#1e3a5f}.reception-stat small{display:block;color:#7b8794;margin-top:5px}
+.reception-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:18px;margin-bottom:18px}.reception-panel{background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:20px;min-width:0}.reception-panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.reception-panel-head h2{font-size:16px;color:#1e3a5f}.reception-panel-head a{font-size:12px;color:#159b9b;text-decoration:none;font-weight:700}
+.reception-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.reception-flow-col{background:#f7f9fb;border:1px solid #e9eef3;border-radius:11px;padding:12px}.reception-flow-col h3{font-size:12px;color:#536579;margin-bottom:10px}.reception-flow-col h3 span{float:right;background:#e8eef4;border-radius:20px;padding:2px 7px}.reception-flow-item{background:#fff;border:1px solid #e6edf2;border-radius:8px;padding:10px;margin-top:8px}.reception-flow-item strong{display:block;font-size:12px;color:#26394d}.reception-flow-item span{display:block;font-size:11px;color:#7b8794;margin-top:4px}.reception-empty{font-size:12px;color:#8a96a3;padding:8px 0}
+.reception-table-wrap{overflow-x:auto}.reception-table{width:100%;border-collapse:collapse;font-size:12px}.reception-table th{text-align:left;color:#7b8794;font-weight:600;padding:10px 8px;border-bottom:1px solid #e9eef3}.reception-table td{padding:12px 8px;border-bottom:1px solid #f0f3f6;color:#405268}.reception-table td strong{display:block;color:#26394d;font-size:12px}.reception-status{display:inline-block;padding:4px 8px;border-radius:20px;background:#eef4f8;color:#536579;font-size:10px;font-weight:700}.reception-status.checked_in{background:#fff4df;color:#9a6700}.reception-status.in_progress{background:#e6f5f4;color:#087f78}.reception-status.completed{background:#eaf7ef;color:#21834a}
+.reception-doctor{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf1f5}.reception-doctor:last-child{border-bottom:0}.reception-doctor strong{display:block;font-size:12px;color:#26394d}.reception-doctor small{color:#7b8794;font-size:11px}.reception-dot{font-size:11px;color:#21834a;white-space:nowrap}.reception-dot.busy{color:#9a6700}
+.reception-callback{padding:11px 0;border-bottom:1px solid #edf1f5}.reception-callback strong{display:block;font-size:12px;color:#26394d}.reception-callback small{font-size:11px;color:#7b8794}
+@media(max-width:1100px){.reception-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.reception-layout{grid-template-columns:1fr}}@media(max-width:650px){.reception-hero{align-items:flex-start;flex-direction:column}.reception-flow{grid-template-columns:1fr}.reception-stats{gap:10px}.reception-stat{padding:14px}.reception-stat strong{font-size:23px}}
+</style>
 
-<div class="stats">
-  {% include 'partials/stat_card.html' with label="Today's Appointments" value=today_appointments|length sub="Scheduled" tone="" icon="user-check" %}
-  {% include 'partials/stat_card.html' with label="Calls in Queue" value=call_queue|length sub="Live" tone="warn" icon="phone-incoming" %}
-  {% include 'partials/stat_card.html' with label="Callback Requests" value=callbacks|length sub="Pending" tone="danger" icon="phone-missed" %}
-  {% include 'partials/stat_card.html' with label="Doctors on Duty" value=doctors|length sub="Available now" tone="success" icon="stethoscope" %}
+<section class="reception-hero">
+  <div><span class="reception-eyebrow">FRONT DESK WORKSPACE</span><h2>Good day, {{ request.user.first_name|default:request.user.username }}</h2><p>Manage today’s arrivals, appointments, and patient follow-ups from one place.</p></div>
+  <div class="reception-actions"><a class="reception-primary" href="{% url 'patient_create' %}">＋ Register patient</a><a class="reception-secondary" href="{% url 'appointment_create' %}">＋ Book appointment</a></div>
+</section>
+
+<div class="reception-stats">
+  <div class="reception-stat"><label>Appointments today</label><strong>{{ today_appointment_count }}</strong><small>Scheduled for today</small></div>
+  <div class="reception-stat"><label>Checked in</label><strong>{{ checked_in_count }}</strong><small>Patients arrived</small></div>
+  <div class="reception-stat"><label>With doctor</label><strong>{{ with_doctor_count }}</strong><small>Consultations in progress</small></div>
+  <div class="reception-stat"><label>Pending callbacks</label><strong>{{ pending_callback_count }}</strong><small>Follow-ups to handle</small></div>
 </div>
 
-<!-- Kanban board -->
-<div class="panel" style="margin-bottom:20px;">
-  <div class="panel-head">
-    <h2><i data-lucide="layout-grid" class="head-icon"></i> Patient Flow — Live Board</h2>
-  </div>
-  <div class="kanban">
-    {% for col in kanban_columns %}
-    <div class="kanban-col">
-      <h4>{{ col.title }} <span class="count">{{ col.items|length }}</span></h4>
-      {% for item in col.items %}
-        <div class="kanban-card">
-          <strong>{{ item.patient.full_name }}</strong>
-          <span>Dr. {{ item.doctor.user.last_name }} · {{ item.time|time:"H:i" }}</span>
-        </div>
-      {% endfor %}
-    </div>
-    {% endfor %}
-  </div>
-</div>
-
-<div class="grid-2">
-  <div class="panel">
-    <div class="panel-head"><h2><i data-lucide="phone-call" class="head-icon"></i> Live Call Queue</h2></div>
-    {% for call in call_queue %}
-    <div class="queue-row">
-      <div class="pos">{{ forloop.counter }}</div>
-      <div class="who">
-        <strong>{{ call.patient_name }}</strong>
-        <span>{{ call.reason }} · Waiting {{ call.wait_time }}</span>
-      </div>
-      <button class="btn-sm btn-success"><i data-lucide="phone"></i> Answer</button>
-    </div>
-    {% endfor %}
-  </div>
-
-  <div class="panel">
-    <div class="panel-head"><h2><i data-lucide="stethoscope" class="head-icon"></i> Doctor Availability</h2></div>
-    <div class="avail-grid">
-      {% for d in doctors %}
-      <div class="avail-item {% if d.is_available %}free{% else %}busy{% endif %}">
-        <strong>Dr. {{ d.user.last_name }}</strong>
-        <span>
-          {% if d.is_available %}
-            <i data-lucide="check-circle"></i> Available
-          {% else %}
-            <i data-lucide="x-circle"></i> Busy
-          {% endif %}
-        </span>
+<div class="reception-layout">
+  <section class="reception-panel">
+    <div class="reception-panel-head"><h2>Patient flow today</h2><a href="{% url 'appointment_list' %}">All appointments →</a></div>
+    <div class="reception-flow">
+      {% for col in kanban_columns %}
+      <div class="reception-flow-col"><h3>{{ col.title }} <span>{{ col.items|length }}</span></h3>
+        {% for item in col.items %}
+        <div class="reception-flow-item"><strong>{{ item.patient.full_name }}</strong><span>Dr. {{ item.doctor.user.last_name }} · {{ item.time|time:system_time_format }}</span></div>
+        {% empty %}<div class="reception-empty">No patients in this stage.</div>{% endfor %}
       </div>
       {% endfor %}
     </div>
-  </div>
+  </section>
+  <section class="reception-panel">
+    <div class="reception-panel-head"><h2>Doctor availability</h2><a href="{% url 'doctor_list' %}">Directory →</a></div>
+    {% for d in doctors %}
+    <div class="reception-doctor"><div><strong>Dr. {{ d.user.get_full_name|default:d.user.username }}</strong><small>{{ d.specialization|default:"General practice" }}{% if d.department %} · {{ d.department.name }}{% endif %}</small></div><span class="reception-dot {% if not d.is_available %}busy{% endif %}">{% if d.is_available %}● Available{% else %}● Busy{% endif %}</span></div>
+    {% empty %}<p class="reception-empty">No doctor profiles are listed yet.</p>{% endfor %}
+  </section>
 </div>
 
+<div class="reception-layout">
+  <section class="reception-panel">
+    <div class="reception-panel-head"><h2>Today’s appointments</h2><a href="{% url 'appointment_create' %}">Book appointment +</a></div>
+    <div class="reception-table-wrap"><table class="reception-table"><thead><tr><th>Time</th><th>Patient</th><th>Doctor</th><th>Status</th></tr></thead><tbody>
+    {% for appt in today_appointments %}<tr><td>{{ appt.time|time:system_time_format }}</td><td><strong>{{ appt.patient.full_name }}</strong>{{ appt.patient.code }}</td><td>Dr. {{ appt.doctor.user.last_name }}</td><td><span class="reception-status {{ appt.status }}">{{ appt.get_status_display }}</span></td></tr>
+    {% empty %}<tr><td colspan="4">No appointments scheduled for today.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  <section class="reception-panel">
+    <div class="reception-panel-head"><h2>Callback requests</h2><a href="{% url 'call_center' %}">Open call center →</a></div>
+    {% for callback in callbacks %}<div class="reception-callback"><strong>{% if callback.patient %}{{ callback.patient.full_name }}{% else %}Callback request{% endif %}</strong><small>{{ callback.reason|default:"Follow-up requested" }}</small></div>
+    {% empty %}<p class="reception-empty">No pending callback requests.</p>{% endfor %}
+  </section>
+</div>
 {% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Directory — MediCare{% endblock %}
+{% block content %}
+<section class="dashboard-intro">
+  <div>
+    <span class="eyebrow">CLINICAL TEAM</span>
+    <h2>Doctor directory</h2>
+    <p>Find each doctor's contact details, professional credentials and clinical availability.</p>
+  </div>
+  <div class="intro-mark"><i data-lucide="stethoscope"></i></div>
+</section>
+
+<div class="doctors-summary">
+  <div class="doctors-summary-icon"><i data-lucide="users-round"></i></div>
+  <div><strong>{{ doctors|length }}</strong><span>Registered doctors</span></div>
+</div>
+
+<section class="panel doctors-panel">
+  <div class="panel-head">
+    <div><span class="panel-kicker">MEDICAL STAFF</span><h2>Doctor profiles</h2><p class="doctor-directory-caption">Each doctor's identity, contact information and professional details are shown separately.</p></div>
+  </div>
+  <div class="doctor-directory-grid">
+    {% for doctor in doctors %}
+    <article class="doctor-profile-card">
+      <header class="doctor-profile-header">
+        <span class="doctor-avatar"><i data-lucide="user-round"></i></span>
+        <div class="doctor-profile-name">
+          <span class="doctor-field-label">DOCTOR</span>
+          <h3>Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}</h3>
+          <span class="doctor-professional-tag">Medical practitioner</span>
+        </div>
+        <div class="doctor-profile-status">
+          {% if doctor.is_available %}<span class="pill green">Available</span>{% else %}<span class="pill orange">Unavailable</span>{% endif %}
+        </div>
+      </header>
+      <div class="doctor-profile-details">
+        <div class="doctor-detail-item"><span class="doctor-field-label">EMAIL ADDRESS</span><strong>{{ doctor.user.email|default:"Not provided" }}</strong></div>
+        <div class="doctor-detail-item"><span class="doctor-field-label">PHONE NUMBER</span><strong>{{ doctor.user.phone|default:"Not provided" }}</strong></div>
+        <div class="doctor-detail-item"><span class="doctor-field-label">SPECIALIZATION</span><strong>{{ doctor.specialization|default:"Not specified" }}</strong></div>
+        <div class="doctor-detail-item"><span class="doctor-field-label">DEPARTMENT</span><strong>{{ doctor.department.name|default:"Unassigned" }}</strong></div>
+        <div class="doctor-detail-item"><span class="doctor-field-label">MEDICAL LICENCE</span><strong>{{ doctor.license_no|default:"Not provided" }}</strong></div>
+        <div class="doctor-detail-item"><span class="doctor-field-label">CONSULTATION FEE</span><strong>UGX {{ doctor.consultation_fee|floatformat:0 }}</strong></div>
+      </div>
+    </article>
+    {% empty %}
+    <div class="doctor-directory-empty"><i data-lucide="stethoscope"></i><strong>No doctor profiles found</strong><span>Doctor profiles will appear here once registered.</span></div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

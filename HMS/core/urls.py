@@ -7,6 +7,13 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('', views.home_redirect, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('users/', views.user_list, name='user_list'),
+    path('doctors/', views.doctor_list, name='doctor_list'),
+    path('settings/', views.hospital_settings, name='hospital_settings'),
+    path('settings/security-access/', views.security_access, name='security_access'),
+    path('settings/system-preferences/', views.system_preferences, name='system_preferences'),
+    path('users/new/', views.user_create, name='user_create'),
+    path('users/<int:pk>/edit/', views.user_edit, name='user_edit'),
 
     path('patients/', views.patient_list, name='patient_list'),
     path('patients/new/', views.patient_create, name='patient_create'),
@@ -18,8 +25,14 @@ urlpatterns = [
     path('appointments/<int:pk>/<str:status>/', views.appointment_update_status, name='appointment_status'),
 
     path('calls/', views.call_center, name='call_center'),
+    path('calls/log/', views.call_log_create, name='call_log_create'),
+    path('calls/callback/new/', views.callback_create, name='callback_create'),
     path('calls/callback/<int:pk>/done/', views.callback_done, name='callback_done'),
 
-   path('invoices/', views.billing_view, name='invoice_list'),
+   path('pharmacy/', views.pharmacy_view, name='pharmacy_view'),
+    path('laboratory/', views.lab_view, name='lab_view'),
+
+    path('invoices/new/', views.invoice_create, name='invoice_create'),
+    path('invoices/', views.billing_view, name='invoice_list'),
     path('invoices/<int:pk>/pay/', views.invoice_pay, name='invoice_pay'),
 ]

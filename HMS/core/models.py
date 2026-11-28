@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from datetime import time
 
 
 class User(AbstractUser):
@@ -186,3 +187,106 @@ class CallbackRequest(models.Model):
     requested_at = models.DateTimeField(auto_now_add=True)
     handled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     handled_at = models.DateTimeField(null=True, blank=True)
+
+class HospitalSettings(models.Model):
+    """Single-row configuration for the hospital's public profile."""
+    hospital_name = models.CharField(max_length=200, default='MediCare Hospital')
+    logo_url = models.URLField(blank=True)
+    address = models.TextField(blank=True)
+    telephone = models.CharField(max_length=30, blank=True)
+    email = models.EmailField(blank=True)
+    operating_hours = models.CharField(max_length=120, default='Open 24 hours')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.hospital_name
+
+
+class AppointmentConfiguration(models.Model):
+    """Single-row appointment booking and clinic-hours configuration."""
+    DURATION_CHOICES = [(15, '15 minutes'), (30, '30 minutes'), (45, '45 minutes'), (60, '60 minutes')]
+
+    appointment_duration = models.PositiveSmallIntegerField(choices=DURATION_CHOICES, default=30)
+    monday = models.BooleanField(default=True)
+    tuesday = models.BooleanField(default=True)
+    wednesday = models.BooleanField(default=True)
+    thursday = models.BooleanField(default=True)
+    friday = models.BooleanField(default=True)
+    saturday = models.BooleanField(default=False)
+    sunday = models.BooleanField(default=False)
+    opening_time = models.TimeField(default=time(8, 0))
+    closing_time = models.TimeField(default=time(17, 0))
+    max_appointments_per_doctor = models.PositiveSmallIntegerField(default=12)
+    online_booking_enabled = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return 'Hospital appointment configuration'
+
+
+class NotificationSettings(models.Model):
+    """Single-row notification preferences for hospital operations."""
+    REMINDER_CHOICES = [(1, '1 hour before'), (2, '2 hours before'), (24, '24 hours before'), (48, '48 hours before')]
+
+    appointment_reminders = models.BooleanField(default=True)
+    payment_alerts = models.BooleanField(default=True)
+    lab_result_alerts = models.BooleanField(default=True)
+    low_stock_alerts = models.BooleanField(default=True)
+    email_notifications = models.BooleanField(default=True)
+    sms_notifications = models.BooleanField(default=False)
+    reminder_hours_before = models.PositiveSmallIntegerField(choices=REMINDER_CHOICES, default=24)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return 'Hospital notification preferences'
+
+
+class SystemPreferences(models.Model):
+    """Hospital-wide display and regional preferences."""
+    CURRENCY_CHOICES = [
+        ('UGX', 'UGX — Ugandan Shilling'),
+        ('USD', 'USD — US Dollar'),
+        ('KES', 'KES — Kenyan Shilling'),
+        ('TZS', 'TZS — Tanzanian Shilling'),
+        ('RWF', 'RWF — Rwandan Franc'),
+        ('EUR', 'EUR — Euro'),
+        ('GBP', 'GBP — British Pound'),
+    ]
+    DATE_FORMAT_CHOICES = [
+        ('d/m/Y', 'DD/MM/YYYY'),
+        ('Y-m-d', 'YYYY-MM-DD'),
+        ('m/d/Y', 'MM/DD/YYYY'),
+    ]
+    TIME_ZONE_CHOICES = [
+        ('Africa/Kampala', 'Africa/Kampala — East Africa Time'),
+        ('Africa/Nairobi', 'Africa/Nairobi — East Africa Time'),
+        ('Africa/Dar_es_Salaam', 'Africa/Dar es Salaam — East Africa Time'),
+        ('Africa/Kigali', 'Africa/Kigali — Central Africa Time'),
+        ('UTC', 'UTC — Coordinated Universal Time'),
+    ]
+    TIME_FORMAT_CHOICES = [('24', '24-hour clock'), ('12', '12-hour clock')]
+
+    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='UGX')
+    date_format = models.CharField(max_length=10, choices=DATE_FORMAT_CHOICES, default='d/m/Y')
+    time_zone = models.CharField(max_length=50, choices=TIME_ZONE_CHOICES, default='Africa/Kampala')
+    time_format = models.CharField(max_length=2, choices=TIME_FORMAT_CHOICES, default='24')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return 'Hospital system preferences'

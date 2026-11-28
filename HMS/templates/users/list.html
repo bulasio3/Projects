@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Users & Roles — MediCare{% endblock %}
+{% block content %}
+<div class="panel">
+  <div class="panel-head">
+    <h2><i data-lucide="users" class="head-icon"></i> User & Role Management</h2>
+    <a class="btn-sm btn-primary" href="{% url 'user_create' %}"><i data-lucide="user-plus"></i> Create account</a>
+  </div>
+  <form method="get" style="display:flex;gap:8px;margin-bottom:16px;">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search username, name or email" style="flex:1;padding:10px;border:1px solid #d0d7de;border-radius:7px;">
+    <button class="btn-sm btn-primary" type="submit">Search</button>
+    {% if q %}<a class="btn-ghost" href="{% url 'user_list' %}">Clear</a>{% endif %}
+  </form>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Account</th><th>Email</th><th>Role</th><th>Status</th><th>Last login</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for account in users %}
+        <tr>
+          <td><strong>{{ account.get_full_name|default:account.username }}</strong><br><small style="color:#6b7a8f;">@{{ account.username }}</small></td>
+          <td>{{ account.email|default:"—" }}</td>
+          <td>{{ account.get_role_display }}</td>
+          <td>{% if account.is_active %}<span class="pill green">Active</span>{% else %}<span class="pill red">Inactive</span>{% endif %}</td>
+          <td>{{ account.last_login|date:"M d, Y H:i"|default:"Never" }}</td>
+          <td><a class="btn-ghost" href="{% url 'user_edit' account.pk %}">Edit</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;padding:24px;color:#6b7a8f;">No user accounts found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:#6b7a8f;margin-top:14px;">Only administrators can access this page. Changes to account roles take effect on the user's next request.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}{{ page_title }} — MediCare{% endblock %}
+{% block content %}
+<div class="form-page">
+  <section class="form-hero">
+    <div><span class="eyebrow">BILLING &amp; FINANCE</span><h2>{{ page_title }}</h2><p>Create a patient invoice and link it to a consultation where applicable.</p></div>
+    <div class="form-hero-icon"><i data-lucide="receipt-text"></i></div>
+  </section>
+  <form method="post" class="form-shell">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    <section class="form-section">
+      <div class="form-section-heading"><span class="form-section-icon"><i data-lucide="user-round"></i></span><div><h3>Invoice recipient</h3><p>Select the patient responsible for this invoice.</p></div></div>
+      {% for field in form %}{% if field.name == 'patient' %}
+      <div class="form-field"><label for="{{ field.id_for_label }}">Patient<span class="required">*</span></label>{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</div>
+      {% endif %}{% endfor %}
+    </section>
+    <section class="form-section">
+      <div class="form-section-heading"><span class="form-section-icon"><i data-lucide="calendar-check"></i></span><div><h3>Related appointment</h3><p>Optionally associate this invoice with a patient's appointment.</p></div></div>
+      {% for field in form %}{% if field.name == 'appointment' %}
+      <div class="form-field"><label for="{{ field.id_for_label }}">Appointment <span class="form-help">(optional)</span></label>{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</div>
+      {% endif %}{% endfor %}
+    </section>
+    <section class="form-section">
+      <div class="form-section-heading"><span class="form-section-icon"><i data-lucide="wallet"></i></span><div><h3>Payment amount</h3><p>Enter the amount to be billed. Currency currently configured: <strong>{{ currency_code }}</strong>.</p></div></div>
+      {% for field in form %}{% if field.name == 'total' %}
+      <div class="form-field"><label for="{{ field.id_for_label }}">Invoice total ({{ currency_code }})<span class="required">*</span></label>{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}<small class="form-help">Enter an amount greater than zero. This records the amount; it does not perform currency conversion.</small></div>
+      {% endif %}{% endfor %}
+    </section>
+    <div class="form-actions"><span class="form-actions-note"><i data-lucide="asterisk"></i> Patient and invoice total are required.</span><div style="display:flex;gap:9px;flex-wrap:wrap;"><a class="form-cancel" href="{% url 'invoice_list' %}">Cancel</a><button class="form-submit" type="submit"><i data-lucide="file-check"></i> Create invoice</button></div></div>
+  </form>
+</div>
+{% endblock %}

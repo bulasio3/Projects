@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% block title %}Hospital Settings — MediCare{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+ const form=document.getElementById('appointment-config-form'); if(!form) return;
+ const duration=form.querySelector('[name="appointment_duration"]');
+ const capacity=form.querySelector('[name="max_appointments_per_doctor"]');
+ const opening=form.querySelector('[name="opening_time"]'); const closing=form.querySelector('[name="closing_time"]');
+ const online=form.querySelector('[name="online_booking_enabled"]');
+ const days=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+ const labels=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+ const dayInputs=days.map(d=>form.querySelector('[name="'+d+'"]'));
+ const dayNames=()=>dayInputs.map((el,i)=>el&&el.checked?labels[i]:null).filter(Boolean);
+ const fmt=t=>{if(!t)return '—';const [h,m]=t.split(':').map(Number);const suffix=h>=12?'PM':'AM';return ((h%12)||12)+':'+String(m).padStart(2,'0')+' '+suffix;};
+ function refresh(){
+  document.getElementById('schedule-preview-hours').textContent=fmt(opening.value)+' – '+fmt(closing.value);
+  const selected=dayNames(); document.getElementById('schedule-preview-days').textContent=selected.length?selected.join(' · '):'No working days selected';
+  document.getElementById('schedule-preview-duration').textContent=(duration.value||30)+' min';
+  document.getElementById('capacity-preview-value').textContent=capacity.value||0;
+  document.getElementById('online-status').textContent=online.checked?'Enabled':'Disabled';
+  document.getElementById('online-description').textContent=online.checked?'Online requests are switched on.':'Online requests are currently switched off.';
+  dayInputs.forEach((el,i)=>{if(el){const label=el.closest('.day-choice');if(label)label.classList.toggle('selected',el.checked);}});
+  form.querySelectorAll('[data-duration]').forEach(btn=>btn.classList.toggle('active',String(duration.value)===btn.dataset.duration));
+ }
+ form.querySelectorAll('[data-duration]').forEach(btn=>btn.addEventListener('click',()=>{duration.value=btn.dataset.duration;refresh();}));
+ form.addEventListener('input',refresh); form.addEventListener('change',refresh); refresh();
+})();
+</script>
+{% endblock %}
+{% block content %}
+<style>
+.settings-page-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px;padding:6px;background:#f3f6fa;border:1px solid #e6ebf1;border-radius:12px;width:fit-content;max-width:100%}.settings-page-tab{display:inline-flex;align-items:center;gap:9px;padding:11px 15px;border-radius:8px;text-decoration:none;color:#617187;font-size:13px;font-weight:700;transition:.2s}.settings-page-tab:hover{background:#fff;color:#0f766e}.settings-page-tab.active{background:#fff;color:#102a43;box-shadow:0 2px 8px #152b4512}.settings-page-tab svg{width:16px;height:16px}.settings-page-tab .tab-arrow{width:13px;height:13px;opacity:.6}
+</style>
+
+<div class="panel" style="margin-bottom:20px;">
+  <div class="panel-head">
+    <h2><i data-lucide="settings" class="head-icon"></i> Hospital Settings</h2>
+    <span class="pill green">Administrator</span>
+  </div>
+  <p style="color:#6b7a8f;margin:0 0 20px;">Manage the hospital's operational setup. Changes made here are saved to the hospital database.</p>
+  <nav class="settings-page-tabs" aria-label="Settings pages">
+    <a class="settings-page-tab active" href="{% url 'hospital_settings' %}"><i data-lucide="sliders-horizontal"></i> General settings</a>
+    <a class="settings-page-tab" href="{% url 'security_access' %}"><i data-lucide="shield-check"></i> Security &amp; Access <i data-lucide="arrow-up-right" class="tab-arrow"></i></a>
+    <a class="settings-page-tab" href="{% url 'system_preferences' %}"><i data-lucide="globe-2"></i> System Preferences <i data-lucide="arrow-up-right" class="tab-arrow"></i></a>
+  </nav>
+  <section class="appointment-config-section hospital-profile-section" id="hospital-profile-section">
+    <div class="appointment-config-heading">
+      <div>
+        <span class="panel-kicker">HOSPITAL IDENTITY & CONTACT</span>
+        <h3>Hospital profile</h3>
+        <p>Manage the hospital's identity and official contact information.</p>
+      </div>
+      <span class="config-live-pill"><span></span> Profile information</span>
+    </div>
+
+    <form method="post" id="hospital-profile-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_profile">
+
+      <div class="hospital-profile-layout">
+        <div class="config-card hospital-logo-card">
+          <div class="config-card-title">
+            <span class="config-icon"><i data-lucide="image"></i></span>
+            <div><strong>Hospital logo</strong><small>Brand identity displayed on hospital materials</small></div>
+          </div>
+          <div class="hospital-logo-preview" id="hospital-logo-preview">
+            {% if profile.logo_url %}
+              <img src="{{ profile.logo_url }}" alt="Hospital logo" id="hospital-logo-image">
+            {% else %}
+              <span class="hospital-logo-placeholder"><i data-lucide="hospital"></i><small>Logo preview</small></span>
+            {% endif %}
+          </div>
+          <label class="config-field">Logo image URL
+            {{ profile_form.logo_url }}
+          </label>
+          {% for error in profile_form.logo_url.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+          <small class="config-hint">Paste a publicly accessible PNG or JPG image URL.</small>
+        </div>
+
+        <div class="config-card hospital-details-card">
+          <div class="config-card-title">
+            <span class="config-icon"><i data-lucide="building-2"></i></span>
+            <div><strong>Hospital information</strong><small>Official name and communication details</small></div>
+          </div>
+          <div class="hospital-profile-fields">
+            <label class="config-field hospital-field-wide">Hospital name
+              {{ profile_form.hospital_name }}
+              {% for error in profile_form.hospital_name.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+            <label class="config-field">Telephone
+              {{ profile_form.telephone }}
+              {% for error in profile_form.telephone.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+            <label class="config-field">Official email
+              {{ profile_form.email }}
+              {% for error in profile_form.email.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+            <label class="config-field hospital-field-wide">Physical address
+              {{ profile_form.address }}
+              {% for error in profile_form.address.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+            <label class="config-field hospital-field-wide">Operating hours
+              {{ profile_form.operating_hours }}
+              {% for error in profile_form.operating_hours.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {% if profile_form.non_field_errors %}<div class="config-error">{{ profile_form.non_field_errors }}</div>{% endif %}
+      <div class="config-actions hospital-profile-actions">
+        <span><i data-lucide="shield-check"></i> Profile details are securely stored in the hospital database.</span>
+        <button type="submit" class="btn-sm btn-primary"><i data-lucide="save"></i> Save hospital profile</button>
+      </div>
+    </form>
+  </section>
+</div>
+  <section class="appointment-config-section" id="appointment-config-section">
+    <div class="appointment-config-heading">
+      <div>
+        <span class="panel-kicker">SCHEDULING & ACCESS</span>
+        <h3>Appointment configuration</h3>
+        <p>Set the hospital's standard consultation schedule and booking capacity.</p>
+      </div>
+      <span class="config-live-pill"><span></span> Live settings preview</span>
+    </div>
+
+    <form method="post" id="appointment-config-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_appointment_config">
+      <div class="appointment-config-grid">
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="clock-3"></i></span><div><strong>Appointment duration</strong><small>Standard time reserved for each consultation</small></div></div>
+          <label class="config-field">Duration per appointment
+            {{ appointment_form.appointment_duration }}
+          </label>
+          <div class="duration-options" role="group" aria-label="Quick appointment duration">
+            <button type="button" data-duration="15">15 min</button>
+            <button type="button" data-duration="30">30 min</button>
+            <button type="button" data-duration="45">45 min</button>
+            <button type="button" data-duration="60">60 min</button>
+          </div>
+        </div>
+
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="calendar-days"></i></span><div><strong>Working days</strong><small>Choose the days when appointments can be scheduled</small></div></div>
+          <div class="working-day-picker">
+            {% for field in appointment_form %}
+              {% if field.name == 'monday' or field.name == 'tuesday' or field.name == 'wednesday' or field.name == 'thursday' or field.name == 'friday' or field.name == 'saturday' or field.name == 'sunday' %}
+              <label class="day-choice {% if field.value %}selected{% endif %}">
+                {{ field }}<span>{{ field.label|slice:":3" }}</span>
+              </label>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <small class="config-hint">Select at least one working day.</small>
+          {% if appointment_form.non_field_errors %}<div class="config-error">{{ appointment_form.non_field_errors }}</div>{% endif %}
+        </div>
+
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="sunrise"></i></span><div><strong>Clinic hours</strong><small>Daily appointment operating window</small></div></div>
+          <div class="time-fields">
+            <label class="config-field">Opening time {{ appointment_form.opening_time }}</label>
+            <label class="config-field">Closing time {{ appointment_form.closing_time }}</label>
+          </div>
+          {% for error in appointment_form.opening_time.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+          {% for error in appointment_form.closing_time.errors %}<small class="config-error">{{ error }}</small>{% endfor %}
+        </div>
+
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="users-round"></i></span><div><strong>Daily booking capacity</strong><small>Maximum appointments per doctor each day</small></div></div>
+          <label class="config-field">Appointments per doctor
+            {{ appointment_form.max_appointments_per_doctor }}
+          </label>
+          <div class="capacity-preview"><span>Daily capacity limit</span><strong><b id="capacity-preview-value">{{ appointment_config.max_appointments_per_doctor }}</b> appointments / doctor</strong></div>
+        </div>
+
+        <div class="config-card config-online-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="globe-2"></i></span><div><strong>Online appointment requests</strong><small>Allow patients to request appointments online</small></div></div>
+          <label class="online-toggle">
+            <span><strong id="online-status">{{ appointment_config.online_booking_enabled|yesno:"Enabled,Disabled" }}</strong><small id="online-description">{% if appointment_config.online_booking_enabled %}Online requests are switched on.{% else %}Online requests are currently switched off.{% endif %}</small></span>
+            <span class="switch-control">{{ appointment_form.online_booking_enabled }}<span class="switch-track"></span></span>
+          </label>
+          <div class="config-hint">This controls the booking preference. A patient-facing online booking flow must be enabled separately.</div>
+        </div>
+      </div>
+
+      <div class="schedule-preview">
+        <div class="schedule-preview-icon"><i data-lucide="calendar-check-2"></i></div>
+        <div class="schedule-preview-copy"><span>YOUR SCHEDULE PREVIEW</span><strong id="schedule-preview-hours">08:00 – 17:00</strong><small id="schedule-preview-days">Monday – Friday</small></div>
+        <div class="schedule-preview-duration"><strong id="schedule-preview-duration">30 min</strong><small>per appointment</small></div>
+      </div>
+      <div class="config-actions">
+        <span><i data-lucide="shield-check"></i> Only administrators can change these settings.</span>
+        <button type="submit" class="btn-sm btn-primary"><i data-lucide="save"></i> Save appointment settings</button>
+      </div>
+      {% if appointment_form.non_field_errors %}<div class="config-error">{{ appointment_form.non_field_errors }}</div>{% endif %}
+    </form>
+  </section>
+
+
+  <section class="appointment-config-section" id="notification-settings-section">
+    <div class="appointment-config-heading">
+      <div>
+        <span class="panel-kicker">COMMUNICATION & ALERTS</span>
+        <h3>Notification preferences</h3>
+        <p>Choose which hospital events should generate alerts and how staff should receive them.</p>
+      </div>
+      <span class="config-live-pill"><span></span> Live preferences</span>
+    </div>
+    <form method="post" id="notification-settings-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_notifications">
+      <div class="appointment-config-grid">
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="calendar-clock"></i></span><div><strong>Appointment reminders</strong><small>Remind patients about upcoming consultations</small></div></div>
+          <label class="online-toggle"><span><strong>Appointment reminders</strong><small>Send a reminder before the appointment date and time.</small></span><span class="switch-control">{{ notification_form.appointment_reminders }}<span class="switch-track"></span></span></label>
+          <label class="config-field" style="margin-top:16px;">Reminder timing {{ notification_form.reminder_hours_before }}</label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="wallet"></i></span><div><strong>Payment alerts</strong><small>Keep relevant staff informed about billing activity</small></div></div>
+          <label class="online-toggle"><span><strong>Payment notifications</strong><small>Alerts for payment and invoice status updates.</small></span><span class="switch-control">{{ notification_form.payment_alerts }}<span class="switch-track"></span></span></label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="test-tube"></i></span><div><strong>Laboratory notifications</strong><small>Notify relevant staff when test results are ready</small></div></div>
+          <label class="online-toggle"><span><strong>Lab result alerts</strong><small>Updates when laboratory results become available.</small></span><span class="switch-control">{{ notification_form.lab_result_alerts }}<span class="switch-track"></span></span></label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="package-warning"></i></span><div><strong>Inventory alerts</strong><small>Help the pharmacy team monitor medicine stock</small></div></div>
+          <label class="online-toggle"><span><strong>Low-stock alerts</strong><small>Notify staff when medicine stock is running low.</small></span><span class="switch-control">{{ notification_form.low_stock_alerts }}<span class="switch-track"></span></span></label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="mail"></i></span><div><strong>Email delivery</strong><small>Preferred channel for official hospital updates</small></div></div>
+          <label class="online-toggle"><span><strong>Email notifications</strong><small>Enable email as a notification channel.</small></span><span class="switch-control">{{ notification_form.email_notifications }}<span class="switch-track"></span></span></label>
+        </div>
+        <div class="config-card">
+          <div class="config-card-title"><span class="config-icon"><i data-lucide="message-square"></i></span><div><strong>SMS delivery</strong><small>Use text messages for time-sensitive updates</small></div></div>
+          <label class="online-toggle"><span><strong>SMS notifications</strong><small>Enable SMS as a notification channel.</small></span><span class="switch-control">{{ notification_form.sms_notifications }}<span class="switch-track"></span></span></label>
+        </div>
+      </div>
+      <div class="schedule-preview">
+        <div class="schedule-preview-icon"><i data-lucide="bell-ring"></i></div>
+        <div class="schedule-preview-copy"><span>NOTIFICATION CHANNELS</span><strong id="notification-channel-preview">Email enabled · SMS disabled</strong><small id="notification-event-preview">4 alert categories enabled</small></div>
+      </div>
+      <div class="config-actions">
+        <span><i data-lucide="shield-check"></i> Preferences are saved securely in the hospital database.</span>
+        <button type="submit" class="btn-sm btn-primary"><i data-lucide="save"></i> Save notification settings</button>
+      </div>
+      {% if notification_form.non_field_errors %}<div class="config-error">{{ notification_form.non_field_errors }}</div>{% endif %}
+    </form>
+  </section>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:22px;">
+    <div style="padding:16px;border:1px solid #e5eaf0;border-radius:10px;">
+      <div style="color:#6b7a8f;font-size:12px;">Departments</div>
+      <strong style="font-size:24px;">{{ departments|length }}</strong>
+    </div>
+    <div style="padding:16px;border:1px solid #e5eaf0;border-radius:10px;">
+      <div style="color:#6b7a8f;font-size:12px;">Registered doctors</div>
+      <strong style="font-size:24px;">{{ doctor_count }}</strong>
+    </div>
+  </div>
+  <h3 style="margin:0 0 12px;">Department management</h3>
+  <p style="color:#6b7a8f;font-size:13px;margin:0 0 16px;">Create hospital departments such as Emergency, Pediatrics, Surgery and Maternity. Doctors can then be assigned to these departments.</p>
+  <form method="post" style="display:grid;grid-template-columns:1fr 1.5fr auto;gap:10px;align-items:end;margin-bottom:22px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="add_department">
+    <label style="font-size:13px;color:#465568;">Department name
+      <input required maxlength="100" name="name" placeholder="e.g. Pediatrics" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #d0d7de;border-radius:7px;">
+    </label>
+    <label style="font-size:13px;color:#465568;">Description
+      <input name="description" placeholder="Brief description (optional)" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #d0d7de;border-radius:7px;">
+    </label>
+    <button type="submit" class="btn-sm btn-primary" style="padding:11px 16px;">Add department</button>
+  </form>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Department</th><th>Description</th><th>Doctors assigned</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for department in departments %}
+        <tr>
+          <td><strong>{{ department.name }}</strong></td>
+          <td>{{ department.description|default:"—" }}</td>
+          <td>{{ department.doctor_set.count }}</td>
+          <td>
+            <form method="post" onsubmit="return confirm('Delete this department?');">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete_department">
+              <input type="hidden" name="department_id" value="{{ department.pk }}">
+              <button type="submit" class="btn-ghost" {% if department.doctor_set.count %}disabled title="Assigned to a doctor"{% endif %}>Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;padding:24px;color:#6b7a8f;">No departments have been created yet. Add the first department above.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:#6b7a8f;margin-top:14px;">A department linked to a doctor is protected from deletion to preserve existing records.</p>
+</div>
+{% endblock %}

@@ -3,7 +3,10 @@
 
 {% block content %}
 <div class="panel">
-  <div class="panel-head"><h2><i data-lucide="receipt" class="head-icon"></i> All Invoices</h2></div>
+  <div class="panel-head">
+    <h2><i data-lucide="receipt" class="head-icon"></i> All Invoices</h2>
+    <a href="{% url 'invoice_create' %}" class="btn-sm btn-success"><i data-lucide="plus"></i> Create Invoice</a>
+  </div>
   <table>
     <thead><tr><th>#</th><th>Patient</th><th>Date</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
     <tbody>
@@ -11,8 +14,8 @@
       <tr>
         <td>INV-{{ i.id|stringformat:"04d" }}</td>
         <td>{{ i.patient.full_name }}</td>
-        <td>{{ i.created_at|date:"M d, Y" }}</td>
-        <td>${{ i.total }}</td>
+        <td>{{ i.created_at|date:system_date_format }}</td>
+        <td>{{ currency_code|default:system_currency }} {{ i.total|floatformat:2 }}</td>
         <td>{% include 'partials/pill.html' with text=i.get_status_display tone="orange" %}</td>
         <td>
           {% if i.status == 'unpaid' %}
