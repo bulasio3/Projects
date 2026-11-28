@@ -1,36 +1,59 @@
 {% extends 'base.html' %}
 {% block title %}Call Center — MediCare{% endblock %}
 {% block content %}
-<div class="grid-2">
-  <div class="panel">
-    <div class="panel-head"><h2><i data-lucide="phone" class="head-icon"></i> Log a Call</h2></div>
-    <form method="post" action="{% url 'call_log_create' %}" style="padding:16px;">{% csrf_token %}
-      {{ call_form.as_p }}
-      <button type="submit" class="btn btn-primary">Save Call</button>
-    </form>
-  </div>
-  <div class="panel">
-    <div class="panel-head"><h2><i data-lucide="phone-missed" class="head-icon"></i> Create Callback</h2></div>
-    <form method="post" action="{% url 'callback_create' %}" style="padding:16px;">{% csrf_token %}
-      {{ callback_form.as_p }}
-      <button type="submit" class="btn btn-primary">Add Callback</button>
-    </form>
-  </div>
-</div>
-<div class="grid-2" style="margin-top:20px;">
-  <div class="panel">
-    <div class="panel-head"><h2>Recent Calls</h2></div>
-    <table><thead><tr><th>Patient</th><th>Status</th><th>Duration</th><th>Started</th></tr></thead><tbody>
-    {% for c in calls %}<tr><td>{{ c.patient.full_name }}</td><td>{% include 'partials/pill.html' with text=c.get_status_display tone="blue" %}</td><td>{{ c.duration_sec }}s</td><td>{{ c.started_at|timesince }} ago</td></tr>
-    {% empty %}<tr><td colspan="4" style="text-align:center;padding:20px;">No calls logged.</td></tr>{% endfor %}
-    </tbody></table>
-  </div>
-  <div class="panel">
-    <div class="panel-head"><h2>Pending Callbacks</h2></div>
-    {% for cb in callbacks %}<div style="padding:12px 16px;border-bottom:1px solid #f0f3f7;display:flex;justify-content:space-between;align-items:center;">
-      <div><strong>{{ cb.patient.full_name }}</strong><span style="display:block;font-size:12px;color:#6b7a8f;">{{ cb.phone }} · {{ cb.reason }}</span></div>
-      <form method="post" action="{% url 'callback_done' cb.pk %}">{% csrf_token %}<button type="submit" class="btn-sm btn-success">Done</button></form>
-    </div>{% empty %}<p style="padding:16px;color:#6b7a8f;">No pending callbacks.</p>{% endfor %}
-  </div>
-</div>
+<section class="call-center-page">
+  <header class="call-center-hero">
+    <div class="call-center-hero-copy">
+      <span class="call-center-eyebrow">RECEPTION WORKSPACE</span>
+      <h2>Call Center</h2>
+      <p>Log patient calls and keep follow-ups organized from one place.</p>
+    </div>
+    <div class="call-center-hero-badge"><i data-lucide="headset"></i><span>Front desk</span></div>
+  </header>
+
+  <section class="call-center-entry-grid" aria-label="Call center actions">
+    <article class="call-center-panel call-center-form-panel">
+      <div class="call-center-panel-heading">
+        <span class="call-center-icon call-center-icon-blue"><i data-lucide="phone-call"></i></span>
+        <div><h3>Log a call</h3><p>Record a call handled by the front desk.</p></div>
+      </div>
+      <form method="post" action="{% url 'call_log_create' %}" class="call-center-form">{% csrf_token %}
+        {% if call_form.non_field_errors %}<div class="call-center-errors">{{ call_form.non_field_errors }}</div>{% endif %}
+        {% for field in call_form %}<div class="call-center-field"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span aria-hidden="true"> *</span>{% endif %}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="call-center-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+        <button type="submit" class="call-center-submit"><i data-lucide="save"></i> Save call</button>
+      </form>
+    </article>
+    <article class="call-center-panel call-center-form-panel">
+      <div class="call-center-panel-heading">
+        <span class="call-center-icon call-center-icon-teal"><i data-lucide="phone-forwarded"></i></span>
+        <div><h3>Create a callback</h3><p>Queue a patient follow-up for the team.</p></div>
+      </div>
+      <form method="post" action="{% url 'callback_create' %}" class="call-center-form">{% csrf_token %}
+        {% if callback_form.non_field_errors %}<div class="call-center-errors">{{ callback_form.non_field_errors }}</div>{% endif %}
+        {% for field in callback_form %}<div class="call-center-field"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span aria-hidden="true"> *</span>{% endif %}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="call-center-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+        <button type="submit" class="call-center-submit"><i data-lucide="plus-circle"></i> Add callback</button>
+      </form>
+    </article>
+  </section>
+
+  <section class="call-center-record-grid">
+    <article class="call-center-panel">
+      <div class="call-center-panel-title"><div><span class="call-center-eyebrow">CALL HISTORY</span><h3>Recent calls</h3></div><span class="call-center-count">{{ calls|length }} shown</span></div>
+      <div class="call-center-table-wrap"><table class="call-center-table"><thead><tr><th>Patient</th><th>Call status</th><th>Duration</th><th>Started</th></tr></thead><tbody>
+      {% for c in calls %}<tr><td><strong>{{ c.patient.full_name }}</strong></td><td>{% include 'partials/pill.html' with text=c.get_status_display tone="blue" %}</td><td>{{ c.duration_sec }} sec</td><td>{{ c.started_at|timesince }} ago</td></tr>
+      {% empty %}<tr><td colspan="4"><div class="call-center-empty"><span><i data-lucide="phone"></i></span><strong>No calls logged yet</strong><small>Calls you save will appear here.</small></div></td></tr>{% endfor %}
+      </tbody></table></div>
+    </article>
+    <article class="call-center-panel">
+      <div class="call-center-panel-title"><div><span class="call-center-eyebrow">FOLLOW-UP QUEUE</span><h3>Pending callbacks</h3></div><span class="call-center-count">{{ callbacks|length }} waiting</span></div>
+      <div class="call-center-callback-list">
+      {% for cb in callbacks %}<div class="call-center-callback">
+        <span class="call-center-callback-avatar">{{ cb.patient.initials }}</span>
+        <div class="call-center-callback-info"><strong>{{ cb.patient.full_name }}</strong><span>{{ cb.phone }}</span><small>{{ cb.reason }}</small></div>
+        <form method="post" action="{% url 'callback_done' cb.pk %}">{% csrf_token %}<button type="submit" class="call-center-done" aria-label="Mark callback for {{ cb.patient.full_name }} as done"><i data-lucide="check"></i><span>Done</span></button></form>
+      </div>{% empty %}<div class="call-center-empty"><span><i data-lucide="check-check"></i></span><strong>All caught up</strong><small>There are no pending callback requests.</small></div>{% endfor %}
+      </div>
+    </article>
+  </section>
+</section>
 {% endblock %}
